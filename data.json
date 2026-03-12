@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "title": "CX AI Impact Dashboard",
+    "org": "Customer Experience",
+    "leader": "Kevin Huang",
+    "leaderTitle": "SVP, Customer Experience",
+    "lastUpdated": "2026-03-12T08:00:00Z"
+  },
+  "teams": [
+    {
+      "id": "support",
+      "name": "Support",
+      "lead": "Lucas Willett",
+      "leadTitle": "Director, Customer Support",
+      "members": ["Lucas Willett", "Christian Staley", "Hannah Holbrook"],
+      "projects": [
+        {
+          "name": "TourFinder",
+          "description": "Property lookups + third-party example finder in Slack",
+          "weeklyMinutes": 450,
+          "owner": "Lucas Willett",
+          "status": "production",
+          "since": "2026-02"
+        },
+        {
+          "name": "Support Triage Assistant",
+          "description": "AI triage copilot for platform migration support",
+          "weeklyMinutes": 200,
+          "owner": "Lucas Willett",
+          "status": "production",
+          "since": "2026-02"
+        },
+        {
+          "name": "Help Center Article Pipeline",
+          "description": "Slack-to-Zendesk article drafting automation",
+          "weeklyMinutes": 150,
+          "owner": "Lucas Willett",
+          "status": "production",
+          "since": "2026-02"
+        },
+        {
+          "name": "Redirect Checker",
+          "description": "On-demand URL validation via Slack + nightly batch",
+          "weeklyMinutes": 150,
+          "owner": "Lucas Willett",
+          "status": "production",
+          "since": "2026-02"
+        },
+        {
+          "name": "Claude Relay",
+          "description": "Multi-agent coordination between terminal and browser AI",
+          "weeklyMinutes": 120,
+          "owner": "Lucas Willett",
+          "status": "production",
+          "since": "2026-02"
+        },
+        {
+          "name": "Matterport Health Checker",
+          "description": "Proactive 3D model health monitoring across 20K+ models",
+          "weeklyMinutes": 120,
+          "owner": "Lucas Willett",
+          "status": "production",
+          "since": "2026-02"
+        },
+        {
+          "name": "Helm",
+          "description": "Personal ops command center — tasks, calendar, AI capture",
+          "weeklyMinutes": 100,
+          "owner": "Lucas Willett",
+          "status": "production",
+          "since": "2026-02"
+        },
+        {
+          "name": "Browser Automation",
+          "description": "Headless Playwright scripts replacing screenshot workflows",
+          "weeklyMinutes": 100,
+          "owner": "Lucas Willett",
+          "status": "production",
+          "since": "2026-02"
+        },
+        {
+          "name": "Command Bot",
+          "description": "Run automation from phone via Slack",
+          "weeklyMinutes": 50,
+          "owner": "Lucas Willett",
+          "status": "production",
+          "since": "2026-02"
+        },
+        {
+          "name": "Cvent Synergy",
+          "description": "Automated Cvent Event Diagramming workflow",
+          "weeklyMinutes": 38,
+          "owner": "Lucas Willett",
+          "status": "production",
+          "since": "2026-02"
+        },
+        {
+          "name": "Incident Commander",
+          "description": "P1 response automation via GPT",
+          "weeklyMinutes": 30,
+          "owner": "Lucas Willett",
+          "status": "production",
+          "since": "2026-02"
+        },
+        {
+          "name": "Tour Opener",
+          "description": "Disabled license audit via headless browser",
+          "weeklyMinutes": 0,
+          "owner": "Lucas Willett",
+          "status": "production",
+          "since": "2026-03"
+        }
+      ]
+    },
+    {
+      "id": "pmo",
+      "name": "Project Management",
+      "lead": "Jackie George",
+      "leadTitle": "Director, Project Management",
+      "members": ["Jackie George", "Cassandra Rowland", "Jakeyla Cowlin", "Jameika Baysinger", "Kassi Fitzpatrick"],
+      "projects": []
+    },
+    {
+      "id": "cs",
+      "name": "Customer Success",
+      "lead": "Ryan Schwartz",
+      "leadTitle": "Sr. Director, Customer Success",
+      "members": ["Ryan Schwartz", "Jennifer Schiraldi", "Emily Jurden", "Bronwyn Neale", "Gabrielle Regidor", "Michael Estrada", "Desiree Crews", "Mellisa Blakemore", "Travis Shannon", "Nicole Garder", "Ryan Lavelle", "Sarah Urbas"],
+      "projects": []
+    }
+  ]
+}
