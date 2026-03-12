@@ -131,6 +131,7 @@
             letter-spacing: 1px;
         }
 
+        .exec-color .team-hours-value { color: #ce93d8; }
         .support-color .team-hours-value { color: #4fc3f7; }
         .pmo-color .team-hours-value { color: #81c784; }
         .cs-color .team-hours-value { color: #ffb74d; }
@@ -242,6 +243,7 @@
             white-space: nowrap;
         }
 
+        .bar-exec { background: #ce93d8; }
         .bar-support { background: #4fc3f7; }
         .bar-pmo { background: #81c784; }
         .bar-cs { background: #ffb74d; }
@@ -300,8 +302,8 @@
     </div>
 </div>
 
-{% set bar_colors = {'support': 'bar-support', 'pmo': 'bar-pmo', 'cs': 'bar-cs'} %}
-{% set card_colors = {'support': 'support-color', 'pmo': 'pmo-color', 'cs': 'cs-color'} %}
+{% set bar_colors = {'exec': 'bar-exec', 'support': 'bar-support', 'pmo': 'bar-pmo', 'cs': 'bar-cs'} %}
+{% set card_colors = {'exec': 'exec-color', 'support': 'support-color', 'pmo': 'pmo-color', 'cs': 'cs-color'} %}
 
 <div class="bar-chart">
     <h2>Team Breakdown</h2>

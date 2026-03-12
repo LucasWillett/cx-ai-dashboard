@@ -8,6 +8,23 @@
   },
   "teams": [
     {
+      "id": "exec",
+      "name": "Executive",
+      "lead": "Kevin Huang",
+      "leadTitle": "SVP, Customer Experience",
+      "members": ["Kevin Huang"],
+      "projects": [
+        {
+          "name": "CD Bot",
+          "description": "ChurnZero-powered property lookup bot for #channel-distribution",
+          "weeklyMinutes": 60,
+          "owner": "Kevin Huang",
+          "status": "production",
+          "since": "2026-02"
+        }
+      ]
+    },
+    {
       "id": "support",
       "name": "Support",
       "lead": "Lucas Willett",
