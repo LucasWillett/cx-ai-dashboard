@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CX AI Impact Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+        .header .subtitle {
+            color: #888;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 48px 20px 20px;
+        }
+        .hero-number {
+            font-size: 96px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+            letter-spacing: -4px;
+        }
+        .hero-unit {
+            font-size: 20px;
+            color: #888;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+        .hero-projections {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 24px;
+        }
+        .projection { text-align: center; }
+        .projection-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ccc;
+        }
+        .projection-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        /* Trend badge */
+        .trend-badge {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            background: rgba(76, 175, 80, 0.15);
+            color: #81c784;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        /* Tab nav */
+        .tab-nav {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 24px 20px 0;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .tab-btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: transparent;
+            color: #888;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { border-color: rgba(255,255,255,0.2); color: #ccc; }
+        .tab-btn.active {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            border-color: rgba(255,255,255,0.15);
+        }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Bar chart section */
+        .bar-chart {
+            padding: 32px 24px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .bar-chart h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+        .bar-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .bar-label {
+            width: 160px;
+            font-size: 13px;
+            color: #888;
+            text-align: right;
+            padding-right: 16px;
+            flex-shrink: 0;
+        }
+        .bar-track {
+            flex: 1;
+            height: 32px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            padding-left: 12px;
+        }
+        .bar-fill span {
+            font-size: 12px;
+            font-weight: 700;
+            color: rgba(0,0,0,0.7);
+            white-space: nowrap;
+        }
+        .bar-exec { background: linear-gradient(90deg, #ce93d8, #ab47bc); }
+        .bar-support { background: linear-gradient(90deg, #4fc3f7, #0288d1); }
+        .bar-pmo { background: linear-gradient(90deg, #81c784, #43a047); }
+        .bar-cs { background: linear-gradient(90deg, #ffb74d, #f57c00); }
+        .bar-people {
+            font-size: 11px;
+            color: #555;
+            margin-left: 12px;
+            white-space: nowrap;
+        }
+
+        /* Team cards */
+        .teams {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 20px;
+            padding: 24px 24px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .team-card {
+            background: #111118;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .team-card:hover { border-color: rgba(255,255,255,0.12); }
+        .team-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .team-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .team-lead {
+            font-size: 13px;
+            color: #666;
+            margin-top: 2px;
+        }
+        .team-hours { text-align: right; }
+        .team-hours-value {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .team-hours-unit {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .exec-color .team-hours-value { color: #ce93d8; }
+        .support-color .team-hours-value { color: #4fc3f7; }
+        .pmo-color .team-hours-value { color: #81c784; }
+        .cs-color .team-hours-value { color: #ffb74d; }
+
+        .team-projects { padding: 12px 24px 20px; }
+        .project-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            cursor: pointer;
+            transition: background 0.15s;
+            margin: 0 -8px;
+            padding-left: 8px;
+            padding-right: 8px;
+            border-radius: 6px;
+        }
+        .project-row:last-child { border-bottom: none; }
+        .project-row:hover { background: rgba(255,255,255,0.03); }
+        .project-info { flex: 1; min-width: 0; }
+        .project-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ddd;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .project-desc {
+            font-size: 12px;
+            color: #555;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .project-hours {
+            font-size: 14px;
+            font-weight: 700;
+            color: #999;
+            margin-left: 16px;
+            white-space: nowrap;
+        }
+        .empty-state {
+            padding: 32px 24px;
+            text-align: center;
+            color: #444;
+            font-size: 14px;
+            font-style: italic;
+        }
+        .status-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4caf50;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .status-dot.empty { background: #333; }
+
+        /* Leaderboard */
+        .leaderboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        .leaderboard h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+        .leaderboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .lb-card {
+            background: #111118;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .lb-rank {
+            font-size: 28px;
+            font-weight: 800;
+            color: #333;
+            width: 40px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .lb-rank.gold { color: #ffd54f; }
+        .lb-rank.silver { color: #b0bec5; }
+        .lb-rank.bronze { color: #ff8a65; }
+        .lb-info { flex: 1; min-width: 0; }
+        .lb-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #ddd;
+        }
+        .lb-desc {
+            font-size: 12px;
+            color: #555;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .lb-stat {
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .lb-hours {
+            font-size: 24px;
+            font-weight: 800;
+            color: #4fc3f7;
+        }
+        .lb-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Chart container */
+        .chart-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        .chart-section h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+        .chart-container {
+            background: #111118;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 24px;
+            height: 300px;
+        }
+
+        /* KPI row */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px 24px;
+        }
+        .kpi-card {
+            background: #111118;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: #fff;
+        }
+        .kpi-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+        .kpi-sub {
+            font-size: 12px;
+            color: #555;
+            margin-top: 8px;
+        }
+
+        /* Project detail modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: #16161f;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 480px;
+            width: 90%;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .modal-close:hover { color: #fff; }
+        .modal h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .modal-team {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+        .modal-desc {
+            font-size: 14px;
+            color: #bbb;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .modal-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        .modal-stat {
+            text-align: center;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+        }
+        .modal-stat-val {
+            font-size: 20px;
+            font-weight: 800;
+            color: #4fc3f7;
+        }
+        .modal-stat-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            color: #333;
+            font-size: 12px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+        }
+
+        @media (max-width: 768px) {
+            .hero-number { font-size: 64px; }
+            .hero-projections { gap: 24px; }
+            .teams { grid-template-columns: 1fr; padding: 0 16px 32px; }
+            .bar-label { width: 100px; font-size: 12px; }
+            .kpi-row { grid-template-columns: 1fr 1fr; }
+            .tab-nav { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>CX AI Impact Dashboard</h1>
+    <div class="subtitle">Customer Experience &middot; Kevin Huang, SVP, Customer Experience</div>
+</div>
+
+<div class="hero">
+    <div class="hero-number" id="heroNumber">0</div>
+    <div class="hero-unit">hours saved per week</div>
+    <div class="hero-projections">
+        <div class="projection">
+            <div class="projection-value" id="monthlyHours">0</div>
+            <div class="projection-label">per month</div>
+        </div>
+        <div class="projection">
+            <div class="projection-value" id="annualHours">0</div>
+            <div class="projection-label">per year</div>
+        </div>
+        <div class="projection">
+            <div class="projection-value" id="projectCount">0</div>
+            <div class="projection-label">projects</div>
+        </div>
+    </div>
+    <div class="trend-badge" id="trendBadge"></div>
+</div>
+
+<!-- KPI Row -->
+<div class="kpi-row" id="kpiRow"></div>
+
+<!-- Tab Navigation -->
+<div class="tab-nav">
+    <button class="tab-btn active" data-tab="overview">Overview</button>
+    <button class="tab-btn" data-tab="leaderboard">Leaderboard</button>
+    <button class="tab-btn" data-tab="growth">Growth</button>
+    <button class="tab-btn" data-tab="teams">Teams</button>
+</div>
+
+<!-- Overview Tab -->
+<div class="tab-panel active" id="tab-overview">
+    <div class="bar-chart">
+        <h2>Team Breakdown</h2>
+        <div id="barChart"></div>
+    </div>
+
+    <div class="teams" id="teamCards"></div>
+</div>
+
+<!-- Leaderboard Tab -->
+<div class="tab-panel" id="tab-leaderboard">
+    <div class="leaderboard">
+        <h2>Top Projects by Impact</h2>
+        <div class="leaderboard-grid" id="leaderboardGrid"></div>
+    </div>
+</div>
+
+<!-- Growth Tab -->
+<div class="tab-panel" id="tab-growth">
+    <div class="chart-section">
+        <h2>Weekly Hours Saved — Growth Over Time</h2>
+        <div class="chart-container">
+            <canvas id="growthChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Teams Tab -->
+<div class="tab-panel" id="tab-teams">
+    <div class="chart-section">
+        <h2>Team Contribution</h2>
+        <div class="chart-container">
+            <canvas id="teamChart"></canvas>
+        </div>
+    </div>
+    <div class="teams" id="teamCardsAlt"></div>
+</div>
+
+<!-- Project Modal -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <h3 id="modalTitle"></h3>
+        <div class="modal-team" id="modalTeam"></div>
+        <div class="modal-desc" id="modalDesc"></div>
+        <div class="modal-stats">
+            <div class="modal-stat">
+                <div class="modal-stat-val" id="modalWeekly"></div>
+                <div class="modal-stat-label">hrs/week</div>
+            </div>
+            <div class="modal-stat">
+                <div class="modal-stat-val" id="modalMonthly"></div>
+                <div class="modal-stat-label">hrs/month</div>
+            </div>
+            <div class="modal-stat">
+                <div class="modal-stat-val" id="modalAnnual"></div>
+                <div class="modal-stat-label">hrs/year</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer" id="footerText">
+    Last updated: March 21, 2026
+</div>
+
+<script>
+// ─── TEAM DISPLAY CONFIG ──────────────────────────────
+const TEAM_CONFIG = {
+  exec:    { color: "#ce93d8", barClass: "bar-exec",    cardClass: "exec-color" },
+  support: { color: "#4fc3f7", barClass: "bar-support", cardClass: "support-color" },
+  pmo:     { color: "#81c784", barClass: "bar-pmo",     cardClass: "pmo-color" },
+  cs:      { color: "#ffb74d", barClass: "bar-cs",      cardClass: "cs-color" }
+};
+
+let DATA = null;
+let GROWTH_DATA = null;
+
+// ─── DATA LOADING ─────────────────────────────────────
+async function loadData() {
+  // Try live API first (when served by Flask), fall back to embedded defaults
+  try {
+    const [dataRes, growthRes] = await Promise.all([
+      fetch('/api/data'),
+      fetch('/api/growth')
+    ]);
+    if (dataRes.ok && growthRes.ok) {
+      const raw = await dataRes.json();
+      GROWTH_DATA = await growthRes.json();
+      // Merge display config onto teams
+      raw.teams.forEach(t => Object.assign(t, TEAM_CONFIG[t.id] || TEAM_CONFIG.support));
+      DATA = raw;
+      document.getElementById('footerText').innerHTML =
+        `Last updated: ${raw.meta.lastUpdated.slice(0, 10)} &middot; Live`;
+      return;
+    }
+  } catch (e) { /* file:// or API down — use fallback */ }
+
+  // Fallback: embedded data for standalone use
+  DATA = FALLBACK_DATA;
+  GROWTH_DATA = FALLBACK_GROWTH;
+}
+
+const FALLBACK_DATA = {
+  meta: { title: "CX AI Impact Dashboard", org: "Customer Experience", leader: "Kevin Huang", leaderTitle: "SVP, Customer Experience", lastUpdated: "2026-03-21" },
+  teams: [
+    { id: "exec", name: "Executive", lead: "Kevin Huang", leadTitle: "SVP, Customer Experience", members: ["Kevin Huang"], ...TEAM_CONFIG.exec, projects: [
+      { name: "CD Bot", description: "ChurnZero-powered property lookup bot for #channel-distribution", weeklyMinutes: 60, owner: "Kevin Huang", status: "production", since: "2026-02" }
+    ]},
+    { id: "support", name: "Support", lead: "Lucas Willett", leadTitle: "Director, Customer Support", members: ["Lucas Willett", "Christian Staley", "Hannah Holbrook"], ...TEAM_CONFIG.support, projects: [
+      { name: "TourFinder", description: "Property lookups, third-party example finder, redirect mapping in Slack", weeklyMinutes: 450, owner: "Lucas Willett", status: "production", since: "2026-01" },
+      { name: "Support Triage Assistant", description: "AI triage copilot for platform migration support tickets", weeklyMinutes: 200, owner: "Lucas Willett", status: "production", since: "2026-02" },
+      { name: "Help Center Article Pipeline", description: "Slack-to-Zendesk article drafting automation", weeklyMinutes: 150, owner: "Lucas Willett", status: "production", since: "2026-02" },
+      { name: "Redirect Checker", description: "Nightly GA4-driven URL validation + Slack on-demand checks", weeklyMinutes: 150, owner: "Lucas Willett", status: "production", since: "2026-01" },
+      { name: "Claude Relay", description: "Multi-agent coordination between terminal and browser AI", weeklyMinutes: 120, owner: "Lucas Willett", status: "production", since: "2026-02" },
+      { name: "Matterport Health Checker", description: "Proactive 3D model health monitoring across 20K+ models", weeklyMinutes: 120, owner: "Lucas Willett", status: "production", since: "2026-02" },
+      { name: "Helm", description: "Personal ops command center — OKRs, calendar, meeting prep, signals", weeklyMinutes: 100, owner: "Lucas Willett", status: "production", since: "2026-01" },
+      { name: "Browser Automation", description: "Headless Playwright scripts replacing manual screenshot workflows", weeklyMinutes: 100, owner: "Lucas Willett", status: "production", since: "2026-02" },
+      { name: "Command Bot", description: "Run any automation from phone via Slack commands", weeklyMinutes: 50, owner: "Lucas Willett", status: "production", since: "2026-02" },
+      { name: "Cvent Synergy", description: "Automated Cvent Event Diagramming intake and QA workflow", weeklyMinutes: 38, owner: "Lucas Willett", status: "production", since: "2026-03" },
+      { name: "Incident Commander", description: "P1 response automation and stakeholder notification", weeklyMinutes: 30, owner: "Lucas Willett", status: "production", since: "2026-02" },
+      { name: "Tour Opener", description: "Disabled license audit — classifies what end users actually see", weeklyMinutes: 0, owner: "Lucas Willett", status: "production", since: "2026-03" }
+    ]},
+    { id: "pmo", name: "Project Management", lead: "Jackie George", leadTitle: "Director, Project Management", members: ["Jackie George", "Cassandra Rowland", "Jakeyla Cowlin", "Jameika Baysinger", "Kassi Fitzpatrick"], ...TEAM_CONFIG.pmo, projects: [] },
+    { id: "cs", name: "Customer Success", lead: "Ryan Schwartz", leadTitle: "Sr. Director, Customer Success", members: ["Ryan Schwartz", "Jennifer Schiraldi", "Emily Jurden", "Bronwyn Neale", "Gabrielle Regidor", "Michael Estrada", "Desiree Crews", "Mellisa Blakemore", "Travis Shannon", "Nicole Garder", "Ryan Lavelle", "Sarah Urbas"], ...TEAM_CONFIG.cs, projects: [] }
+  ]
+};
+
+const FALLBACK_GROWTH = [
+  { week: "Jan 19", hours: 7.5 }, { week: "Jan 26", hours: 10.0 },
+  { week: "Feb 2", hours: 11.7 }, { week: "Feb 9", hours: 15.5 },
+  { week: "Feb 16", hours: 21.0 }, { week: "Feb 23", hours: 23.5 },
+  { week: "Mar 2", hours: 25.5 }, { week: "Mar 9", hours: 26.1 },
+  { week: "Mar 16", hours: 26.1 }, { week: "Mar 21", hours: 26.1 }
+];
+
+// ─── COMPUTE STATS ────────────────────────────────────
+function computeStats() {
+  let totalMinutes = 0;
+  let totalProjects = 0;
+  let totalPeople = 0;
+
+  DATA.teams.forEach(t => {
+    t.weeklyMinutes = t.projects.reduce((sum, p) => sum + p.weeklyMinutes, 0);
+    t.weeklyHours = (t.weeklyMinutes / 60).toFixed(1);
+    totalMinutes += t.weeklyMinutes;
+    totalProjects += t.projects.length;
+    totalPeople += t.members.length;
+  });
+
+  return {
+    weeklyMinutes: totalMinutes,
+    weeklyHours: (totalMinutes / 60).toFixed(1),
+    monthlyHours: (totalMinutes / 60 * 4.33).toFixed(0),
+    annualHours: (totalMinutes / 60 * 52).toFixed(0),
+    projectCount: totalProjects,
+    totalPeople,
+    teamsWithProjects: DATA.teams.filter(t => t.projects.length > 0).length,
+    avgPerPerson: (totalMinutes / 60 / totalPeople).toFixed(1)
+  };
+}
+
+// ─── ANIMATE NUMBER ───────────────────────────────────
+function animateNumber(el, target, suffix = '', duration = 1200) {
+  const start = 0;
+  const startTime = performance.now();
+  const isFloat = String(target).includes('.');
+
+  function update(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    const current = start + (target - start) * ease;
+    el.textContent = (isFloat ? current.toFixed(1) : Math.round(current)) + suffix;
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+// ─── RENDER ───────────────────────────────────────────
+function render() {
+  const stats = computeStats();
+
+  // Hero
+  animateNumber(document.getElementById('heroNumber'), parseFloat(stats.weeklyHours));
+  animateNumber(document.getElementById('monthlyHours'), parseInt(stats.monthlyHours));
+  animateNumber(document.getElementById('annualHours'), parseInt(stats.annualHours));
+  animateNumber(document.getElementById('projectCount'), stats.projectCount);
+
+  // Trend badge — compute from growth data
+  const badge = document.getElementById('trendBadge');
+  if (GROWTH_DATA && GROWTH_DATA.length >= 2) {
+    const earliest = GROWTH_DATA[0];
+    const latest = GROWTH_DATA[GROWTH_DATA.length - 1];
+    const pctChange = Math.round((latest.hours - earliest.hours) / earliest.hours * 100);
+    const monthName = earliest.week.split(' ')[0];
+    badge.textContent = `+${pctChange}% since ${monthName}`;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  // KPI cards
+  const kpiRow = document.getElementById('kpiRow');
+  const kpis = [
+    { value: stats.totalPeople, label: 'People', sub: `${stats.teamsWithProjects} of ${DATA.teams.length} teams active` },
+    { value: stats.avgPerPerson, label: 'Avg hrs/person/wk', sub: 'Across all team members' },
+    { value: '$' + (parseFloat(stats.annualHours) * 45).toLocaleString(), label: 'Est. Annual Value', sub: 'At $45/hr loaded cost' },
+    { value: Math.round(parseFloat(stats.weeklyHours) / 40 * 100) + '%', label: 'FTE Equivalent', sub: `${(parseFloat(stats.weeklyHours) / 40).toFixed(1)} full-time employees` }
+  ];
+  kpiRow.innerHTML = kpis.map(k => `
+    <div class="kpi-card">
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>
+  `).join('');
+
+  // Bar chart
+  const barChart = document.getElementById('barChart');
+  barChart.innerHTML = DATA.teams.map(t => {
+    const pct = stats.weeklyMinutes > 0 ? (t.weeklyMinutes / stats.weeklyMinutes * 100).toFixed(1) : 0;
+    return `
+      <div class="bar-row">
+        <div class="bar-label">${t.name}</div>
+        <div class="bar-track">
+          <div class="bar-fill ${t.barClass}" style="width: 0%" data-width="${pct}%">
+            <span>${t.weeklyHours} hrs/wk</span>
+          </div>
+        </div>
+        <div class="bar-people">${t.members.length} people</div>
+      </div>
+    `;
+  }).join('');
+
+  // Animate bars
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.width;
+    });
+  });
+
+  // Team cards (both tabs)
+  ['teamCards', 'teamCardsAlt'].forEach(containerId => {
+    const container = document.getElementById(containerId);
+    container.innerHTML = DATA.teams.map(t => {
+      const sorted = [...t.projects].sort((a, b) => b.weeklyMinutes - a.weeklyMinutes);
+      const projectsHTML = sorted.length ? sorted.map(p => `
+        <div class="project-row" onclick="openModal('${p.name.replace(/'/g, "\\'")}', '${t.name}')">
+          <div class="project-info">
+            <div class="project-name"><span class="status-dot${p.status !== 'production' ? ' empty' : ''}"></span>${p.name}</div>
+            <div class="project-desc">${p.description}</div>
+          </div>
+          <div class="project-hours" ${p.weeklyMinutes === 0 ? 'style="color:#333"' : ''}>
+            ${p.weeklyMinutes > 0 ? (p.weeklyMinutes / 60).toFixed(1) + 'h/wk' : 'on-demand'}
+          </div>
+        </div>
+      `).join('') : '';
+
+      return `
+        <div class="team-card ${t.cardClass}">
+          <div class="team-header">
+            <div>
+              <div class="team-name">${t.name}</div>
+              <div class="team-lead">${t.lead} &middot; ${t.members.length} people</div>
+            </div>
+            <div class="team-hours">
+              <div class="team-hours-value">${t.weeklyHours}</div>
+              <div class="team-hours-unit">hrs / week</div>
+            </div>
+          </div>
+          ${sorted.length ? '<div class="team-projects">' + projectsHTML + '</div>' : '<div class="empty-state">No projects reported yet</div>'}
+        </div>
+      `;
+    }).join('');
+  });
+
+  // Leaderboard
+  const allProjects = DATA.teams.flatMap(t =>
+    t.projects.map(p => ({ ...p, team: t.name, color: t.color }))
+  ).filter(p => p.weeklyMinutes > 0).sort((a, b) => b.weeklyMinutes - a.weeklyMinutes);
+
+  const lbGrid = document.getElementById('leaderboardGrid');
+  lbGrid.innerHTML = allProjects.map((p, i) => {
+    const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    return `
+      <div class="lb-card" onclick="openModal('${p.name.replace(/'/g, "\\'")}', '${p.team}')">
+        <div class="lb-rank ${rankClass}">${i + 1}</div>
+        <div class="lb-info">
+          <div class="lb-name">${p.name}</div>
+          <div class="lb-desc">${p.team} &middot; ${p.owner}</div>
+        </div>
+        <div class="lb-stat">
+          <div class="lb-hours" style="color:${p.color}">${(p.weeklyMinutes / 60).toFixed(1)}</div>
+          <div class="lb-label">hrs/wk</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Growth chart
+  renderGrowthChart();
+
+  // Team doughnut chart
+  renderTeamChart();
+}
+
+// ─── CHARTS ───────────────────────────────────────────
+function renderGrowthChart() {
+  const ctx = document.getElementById('growthChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: GROWTH_DATA.map(d => d.week),
+      datasets: [{
+        label: 'Hours Saved / Week',
+        data: GROWTH_DATA.map(d => d.hours),
+        borderColor: '#4fc3f7',
+        backgroundColor: 'rgba(79, 195, 247, 0.1)',
+        fill: true,
+        tension: 0.35,
+        pointBackgroundColor: '#4fc3f7',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderWidth: 2.5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1a2e',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          titleColor: '#fff',
+          bodyColor: '#ccc',
+          callbacks: {
+            label: ctx => ctx.parsed.y.toFixed(1) + ' hrs/wk'
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.03)' },
+          ticks: { color: '#555', font: { size: 11 } }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(255,255,255,0.03)' },
+          ticks: {
+            color: '#555',
+            font: { size: 11 },
+            callback: v => v + 'h'
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderTeamChart() {
+  const ctx = document.getElementById('teamChart').getContext('2d');
+  const activeTeams = DATA.teams.filter(t => t.weeklyMinutes > 0);
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: activeTeams.map(t => t.name),
+      datasets: [{
+        data: activeTeams.map(t => t.weeklyMinutes),
+        backgroundColor: activeTeams.map(t => t.color),
+        borderColor: '#111118',
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            color: '#888',
+            font: { size: 13 },
+            padding: 16,
+            usePointStyle: true,
+            pointStyleWidth: 12
+          }
+        },
+        tooltip: {
+          backgroundColor: '#1a1a2e',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          titleColor: '#fff',
+          bodyColor: '#ccc',
+          callbacks: {
+            label: ctx => {
+              const hrs = (ctx.parsed / 60).toFixed(1);
+              const pct = (ctx.parsed / DATA.teams.reduce((s,t) => s + t.weeklyMinutes, 0) * 100).toFixed(0);
+              return ` ${ctx.label}: ${hrs} hrs/wk (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// ─── MODAL ────────────────────────────────────────────
+function openModal(projectName, teamName) {
+  const team = DATA.teams.find(t => t.name === teamName);
+  const project = team.projects.find(p => p.name === projectName);
+  if (!project) return;
+
+  document.getElementById('modalTitle').textContent = project.name;
+  document.getElementById('modalTeam').textContent = `${teamName} · ${project.owner} · Since ${project.since}`;
+  document.getElementById('modalDesc').textContent = project.description;
+
+  const wHrs = (project.weeklyMinutes / 60).toFixed(1);
+  const mHrs = (project.weeklyMinutes / 60 * 4.33).toFixed(0);
+  const aHrs = (project.weeklyMinutes / 60 * 52).toFixed(0);
+  document.getElementById('modalWeekly').textContent = wHrs;
+  document.getElementById('modalMonthly').textContent = mHrs;
+  document.getElementById('modalAnnual').textContent = aHrs;
+
+  document.getElementById('modalOverlay').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+}
+
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ─── TABS ─────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ─── INIT ─────────────────────────────────────────────
+loadData().then(() => render());
+</script>
+
+</body>
+</html>

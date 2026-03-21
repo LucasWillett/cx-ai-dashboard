@@ -6,14 +6,23 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, request, send_file
 
 app = Flask(__name__)
-DATA_FILE = Path(__file__).parent / 'data.json'
+BASE_DIR = Path(__file__).parent
+DATA_FILE = BASE_DIR / 'data.json'
+GROWTH_FILE = BASE_DIR / 'growth.json'
+DASHBOARD_FILE = BASE_DIR / 'demo.html'
 
 
 def load_data():
     return json.loads(DATA_FILE.read_text())
+
+
+def load_growth():
+    if GROWTH_FILE.exists():
+        return json.loads(GROWTH_FILE.read_text())
+    return []
 
 
 def save_data(data):
@@ -58,15 +67,25 @@ def compute_stats(data):
 
 @app.route('/')
 def dashboard():
-    data = load_data()
-    stats = compute_stats(data)
-    return render_template('dashboard.html', stats=stats)
+    return send_file(DASHBOARD_FILE)
 
 
 @app.route('/api/stats')
 def api_stats():
     data = load_data()
     return jsonify(compute_stats(data))
+
+
+@app.route('/api/data')
+def api_data():
+    """Raw data.json — consumed by the dashboard client-side."""
+    return jsonify(load_data())
+
+
+@app.route('/api/growth')
+def api_growth():
+    """Growth timeline data."""
+    return jsonify(load_growth())
 
 
 @app.route('/api/add-project', methods=['POST'])
@@ -93,6 +112,7 @@ def add_project():
         'owner': payload['owner'],
         'status': payload.get('status', 'production'),
         'since': datetime.now(timezone.utc).strftime('%Y-%m'),
+        'addedDate': datetime.now(timezone.utc).strftime('%Y-%m-%d'),
     })
 
     save_data(data)
