@@ -479,6 +479,112 @@
             margin-top: 2px;
         }
 
+        /* Sponsor banner */
+        .sponsor-banner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px 24px;
+        }
+        .sponsor-card {
+            background: linear-gradient(135deg, rgba(206,147,216,0.08), rgba(206,147,216,0.03));
+            border: 1px solid rgba(206,147,216,0.15);
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .sponsor-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .sponsor-badge {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #ce93d8;
+            background: rgba(206,147,216,0.12);
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+        .sponsor-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #ddd;
+        }
+        .sponsor-title {
+            font-size: 12px;
+            color: #666;
+        }
+        .sponsor-project {
+            text-align: right;
+        }
+        .sponsor-project-name {
+            font-size: 13px;
+            color: #ce93d8;
+            font-weight: 600;
+        }
+        .sponsor-project-hours {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Legacy section */
+        .legacy-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        .legacy-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .legacy-header h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .legacy-toggle {
+            font-size: 12px;
+            color: #555;
+            background: none;
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .legacy-toggle:hover { color: #888; border-color: rgba(255,255,255,0.15); }
+        .legacy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+        }
+        .legacy-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .legacy-item-name {
+            font-size: 13px;
+            color: #888;
+            font-weight: 500;
+        }
+        .legacy-item-hours {
+            font-size: 13px;
+            color: #555;
+            font-weight: 600;
+        }
+
         /* Footer */
         .footer {
             text-align: center;
@@ -536,6 +642,9 @@
     <button class="tab-btn" data-tab="teams">Teams</button>
 </div>
 
+<!-- Sponsor Banner (Kevin) -->
+<div class="sponsor-banner" id="sponsorBanner"></div>
+
 <!-- Overview Tab -->
 <div class="tab-panel active" id="tab-overview">
     <div class="bar-chart">
@@ -544,6 +653,15 @@
     </div>
 
     <div class="teams" id="teamCards"></div>
+
+    <!-- Legacy projects (pre-competition) -->
+    <div class="legacy-section" id="legacySection" style="display:none">
+        <div class="legacy-header">
+            <h2>Legacy Projects</h2>
+            <button class="legacy-toggle" onclick="toggleLegacy()">Hide</button>
+        </div>
+        <div class="legacy-grid" id="legacyGrid"></div>
+    </div>
 </div>
 
 <!-- Leaderboard Tab -->
@@ -673,18 +791,41 @@ const FALLBACK_GROWTH = [
   { week: "Mar 16", hours: 26.1 }, { week: "Mar 21", hours: 26.1 }
 ];
 
+// ─── TEAM HELPERS ─────────────────────────────────────
+function getExecTeam() { return DATA.teams.find(t => t.id === 'exec'); }
+function getCompetingTeams() { return DATA.teams.filter(t => t.id !== 'exec'); }
+function getCompetitionStart() { return DATA.meta.competitionStartDate || null; }
+
+function isLegacy(project) {
+  const start = getCompetitionStart();
+  if (!start) return true; // No competition yet = everything is legacy
+  return (project.addedDate || project.since) < start;
+}
+
 // ─── COMPUTE STATS ────────────────────────────────────
 function computeStats() {
   let totalMinutes = 0;
   let totalProjects = 0;
   let totalPeople = 0;
+  const competingTeams = getCompetingTeams();
 
+  // Compute for ALL teams (including exec) for org-wide totals
   DATA.teams.forEach(t => {
     t.weeklyMinutes = t.projects.reduce((sum, p) => sum + p.weeklyMinutes, 0);
     t.weeklyHours = (t.weeklyMinutes / 60).toFixed(1);
     totalMinutes += t.weeklyMinutes;
     totalProjects += t.projects.length;
     totalPeople += t.members.length;
+  });
+
+  // Competition stats — only competing teams, only post-start projects
+  const start = getCompetitionStart();
+  competingTeams.forEach(t => {
+    const activeProjects = start ? t.projects.filter(p => !isLegacy(p)) : [];
+    t.competitionMinutes = activeProjects.reduce((sum, p) => sum + p.weeklyMinutes, 0);
+    t.competitionHours = (t.competitionMinutes / 60).toFixed(1);
+    t.competitionProjects = activeProjects.length;
+    t.legacyProjects = start ? t.projects.filter(p => isLegacy(p)) : t.projects;
   });
 
   return {
@@ -695,8 +836,18 @@ function computeStats() {
     projectCount: totalProjects,
     totalPeople,
     teamsWithProjects: DATA.teams.filter(t => t.projects.length > 0).length,
-    avgPerPerson: (totalMinutes / 60 / totalPeople).toFixed(1)
+    avgPerPerson: (totalMinutes / 60 / totalPeople).toFixed(1),
+    competitionActive: !!start
   };
+}
+
+let legacyVisible = true;
+function toggleLegacy() {
+  legacyVisible = !legacyVisible;
+  const section = document.getElementById('legacyGrid');
+  const btn = document.querySelector('.legacy-toggle');
+  section.style.display = legacyVisible ? 'grid' : 'none';
+  btn.textContent = legacyVisible ? 'Hide' : 'Show';
 }
 
 // ─── ANIMATE NUMBER ───────────────────────────────────
@@ -719,14 +870,17 @@ function animateNumber(el, target, suffix = '', duration = 1200) {
 // ─── RENDER ───────────────────────────────────────────
 function render() {
   const stats = computeStats();
+  const exec = getExecTeam();
+  const teams = getCompetingTeams();
+  const competitionActive = stats.competitionActive;
 
-  // Hero
+  // Hero — always shows org-wide totals
   animateNumber(document.getElementById('heroNumber'), parseFloat(stats.weeklyHours));
   animateNumber(document.getElementById('monthlyHours'), parseInt(stats.monthlyHours));
   animateNumber(document.getElementById('annualHours'), parseInt(stats.annualHours));
   animateNumber(document.getElementById('projectCount'), stats.projectCount);
 
-  // Trend badge — compute from growth data
+  // Trend badge
   const badge = document.getElementById('trendBadge');
   if (GROWTH_DATA && GROWTH_DATA.length >= 2) {
     const earliest = GROWTH_DATA[0];
@@ -739,11 +893,34 @@ function render() {
     badge.style.display = 'none';
   }
 
+  // Sponsor banner (Kevin)
+  if (exec) {
+    const execProject = exec.projects[0];
+    document.getElementById('sponsorBanner').innerHTML = `
+      <div class="sponsor-card">
+        <div class="sponsor-info">
+          <div class="sponsor-badge">Executive Sponsor</div>
+          <div>
+            <div class="sponsor-name">${exec.lead}</div>
+            <div class="sponsor-title">${exec.leadTitle}</div>
+          </div>
+        </div>
+        ${execProject ? `
+        <div class="sponsor-project">
+          <div class="sponsor-project-name">${execProject.name}</div>
+          <div class="sponsor-project-hours">${(execProject.weeklyMinutes / 60).toFixed(1)} hrs/wk</div>
+        </div>` : ''}
+      </div>
+    `;
+  }
+
   // KPI cards
+  const competingPeople = teams.reduce((s, t) => s + t.members.length, 0);
+  const competingTeamsActive = teams.filter(t => t.projects.length > 0).length;
   const kpiRow = document.getElementById('kpiRow');
   const kpis = [
-    { value: stats.totalPeople, label: 'People', sub: `${stats.teamsWithProjects} of ${DATA.teams.length} teams active` },
-    { value: stats.avgPerPerson, label: 'Avg hrs/person/wk', sub: 'Across all team members' },
+    { value: competingPeople, label: 'People', sub: `${competingTeamsActive} of ${teams.length} teams active` },
+    { value: (parseFloat(stats.weeklyHours) / competingPeople).toFixed(1), label: 'Avg hrs/person/wk', sub: 'Across competing teams' },
     { value: '$' + (parseFloat(stats.annualHours) * 45).toLocaleString(), label: 'Est. Annual Value', sub: 'At $45/hr loaded cost' },
     { value: Math.round(parseFloat(stats.weeklyHours) / 40 * 100) + '%', label: 'FTE Equivalent', sub: `${(parseFloat(stats.weeklyHours) / 40).toFixed(1)} full-time employees` }
   ];
@@ -755,10 +932,11 @@ function render() {
     </div>
   `).join('');
 
-  // Bar chart
+  // Bar chart — competing teams only
+  const competingMinutes = teams.reduce((s, t) => s + t.weeklyMinutes, 0);
   const barChart = document.getElementById('barChart');
-  barChart.innerHTML = DATA.teams.map(t => {
-    const pct = stats.weeklyMinutes > 0 ? (t.weeklyMinutes / stats.weeklyMinutes * 100).toFixed(1) : 0;
+  barChart.innerHTML = teams.map(t => {
+    const pct = competingMinutes > 0 ? (t.weeklyMinutes / competingMinutes * 100).toFixed(1) : 0;
     return `
       <div class="bar-row">
         <div class="bar-label">${t.name}</div>
@@ -772,18 +950,22 @@ function render() {
     `;
   }).join('');
 
-  // Animate bars
   requestAnimationFrame(() => {
     document.querySelectorAll('.bar-fill').forEach(bar => {
       bar.style.width = bar.dataset.width;
     });
   });
 
-  // Team cards (both tabs)
-  ['teamCards', 'teamCardsAlt'].forEach(containerId => {
+  // Team cards — competing teams only, show active projects (or all if no competition yet)
+  function renderTeamCards(containerId) {
     const container = document.getElementById(containerId);
-    container.innerHTML = DATA.teams.map(t => {
-      const sorted = [...t.projects].sort((a, b) => b.weeklyMinutes - a.weeklyMinutes);
+    container.innerHTML = teams.map(t => {
+      const displayProjects = competitionActive
+        ? t.projects.filter(p => !isLegacy(p))
+        : t.projects;
+      const sorted = [...displayProjects].sort((a, b) => b.weeklyMinutes - a.weeklyMinutes);
+      const displayHours = competitionActive ? t.competitionHours : t.weeklyHours;
+
       const projectsHTML = sorted.length ? sorted.map(p => `
         <div class="project-row" onclick="openModal('${p.name.replace(/'/g, "\\'")}', '${t.name}')">
           <div class="project-info">
@@ -804,7 +986,7 @@ function render() {
               <div class="team-lead">${t.lead} &middot; ${t.members.length} people</div>
             </div>
             <div class="team-hours">
-              <div class="team-hours-value">${t.weeklyHours}</div>
+              <div class="team-hours-value">${displayHours}</div>
               <div class="team-hours-unit">hrs / week</div>
             </div>
           </div>
@@ -812,12 +994,37 @@ function render() {
         </div>
       `;
     }).join('');
-  });
+  }
 
-  // Leaderboard
-  const allProjects = DATA.teams.flatMap(t =>
-    t.projects.map(p => ({ ...p, team: t.name, color: t.color }))
+  renderTeamCards('teamCards');
+  renderTeamCards('teamCardsAlt');
+
+  // Legacy section — show pre-competition projects in a compact grid
+  const allLegacy = teams.flatMap(t =>
+    (t.legacyProjects || []).map(p => ({ ...p, team: t.name, color: t.color }))
   ).filter(p => p.weeklyMinutes > 0).sort((a, b) => b.weeklyMinutes - a.weeklyMinutes);
+
+  const legacySection = document.getElementById('legacySection');
+  if (allLegacy.length > 0 && competitionActive) {
+    legacySection.style.display = 'block';
+    const totalLegacyHrs = allLegacy.reduce((s, p) => s + p.weeklyMinutes, 0) / 60;
+    document.querySelector('.legacy-header h2').textContent =
+      `Legacy Projects (${allLegacy.length} projects \u00b7 ${totalLegacyHrs.toFixed(1)} hrs/wk)`;
+    document.getElementById('legacyGrid').innerHTML = allLegacy.map(p => `
+      <div class="legacy-item" onclick="openModal('${p.name.replace(/'/g, "\\'")}', '${p.team}')">
+        <div class="legacy-item-name">${p.name}</div>
+        <div class="legacy-item-hours">${(p.weeklyMinutes / 60).toFixed(1)}h/wk</div>
+      </div>
+    `).join('');
+  } else {
+    legacySection.style.display = 'none';
+  }
+
+  // Leaderboard — competing teams only (exclude exec)
+  const allProjects = teams.flatMap(t => {
+    const projects = competitionActive ? t.projects.filter(p => !isLegacy(p)) : t.projects;
+    return projects.map(p => ({ ...p, team: t.name, color: t.color }));
+  }).filter(p => p.weeklyMinutes > 0).sort((a, b) => b.weeklyMinutes - a.weeklyMinutes);
 
   const lbGrid = document.getElementById('leaderboardGrid');
   lbGrid.innerHTML = allProjects.map((p, i) => {
@@ -840,7 +1047,7 @@ function render() {
   // Growth chart
   renderGrowthChart();
 
-  // Team doughnut chart
+  // Team doughnut chart — competing teams only
   renderTeamChart();
 }
 
@@ -901,7 +1108,7 @@ function renderGrowthChart() {
 
 function renderTeamChart() {
   const ctx = document.getElementById('teamChart').getContext('2d');
-  const activeTeams = DATA.teams.filter(t => t.weeklyMinutes > 0);
+  const activeTeams = getCompetingTeams().filter(t => t.weeklyMinutes > 0);
   new Chart(ctx, {
     type: 'doughnut',
     data: {
