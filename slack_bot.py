@@ -14,18 +14,26 @@ import os
 import random
 import re
 import time
+import requests
 from pathlib import Path
 
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
 # Config
-SLACK_BOT_TOKEN = os.environ.get('CX_DASHBOARD_BOT_TOKEN', '')
-LISTEN_CHANNELS = {
-    'C0AGULNT9EU': 'lucas-bot-testing',
+SLACK_BOT_TOKEN = os.environ.get('CX_DASHBOARD_BOT_TOKEN', '')  # Dedicated CX AI Tracker app
+# Channel progression — demo in cx-directors, go-live in cx-internal
+# NOTE: ai-in-action intake_bot.py also handles "ai win:" — don't overlap channels
+STAGE = "test"  # "test", "demo", "prod"
+CHANNELS = {
+    "test": {'C0ANH6WKU8N': 'cs-bot-testing'},      # No overlap with ai-in-action test channels
+    "demo": {'C06432E9H36': 'cx-directors'},
+    "prod": {'C05U74HDVLH': 'cx-internal'},
 }
+LISTEN_CHANNELS = CHANNELS[STAGE]
 DATA_FILE = Path(__file__).parent / 'data.json'
-POLL_INTERVAL = 10  # seconds
+RENDER_URL = 'https://cx-ai-dashboard.onrender.com'
+POLL_INTERVAL = 15  # seconds — shared token, don't hammer
 
 # Team aliases for matching
 TEAM_ALIASES = {
@@ -176,12 +184,28 @@ def add_project(name, description, weekly_minutes, team_id, submitter_id):
     })
 
     save_data(data)
+
+    # Push to Render so the live dashboard updates immediately
+    try:
+        requests.post(f'{RENDER_URL}/api/add-project', json={
+            'team': team_id,
+            'name': name,
+            'description': description,
+            'weeklyMinutes': weekly_minutes,
+            'owner': f'<@{submitter_id}>',
+        }, timeout=30)
+    except Exception as e:
+        print(f"Render push failed (non-blocking): {e}")
+
     hours = round(weekly_minutes / 60, 1)
     return True, f"*{name}* → {team['name']} — {hours} hrs/wk"
 
 
 def post(channel, text, thread_ts=None):
     """Post a message, swallowing errors."""
+    if not channel:
+        print("Warning: post() called with no channel — skipping")
+        return
     try:
         client.chat_postMessage(channel=channel, text=text, thread_ts=thread_ts)
     except SlackApiError as e:
@@ -389,6 +413,10 @@ def poll_messages():
             except SlackApiError as e:
                 if 'not_in_channel' in str(e):
                     print(f"Bot not in #{ch_name} — invite it first")
+                elif 'ratelimited' in str(e):
+                    retry_after = int(e.response.headers.get('Retry-After', 30))
+                    print(f"Rate limited — backing off {retry_after}s")
+                    time.sleep(retry_after)
                 else:
                     print(f"Slack error ({ch_name}): {e}")
             except Exception as e:

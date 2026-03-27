@@ -1197,6 +1197,23 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 // ─── INIT ─────────────────────────────────────────────
 loadData().then(() => render());
+
+// Auto-refresh every 10 seconds for live demo — only re-render if data changed
+let _lastDataHash = '';
+setInterval(async () => {
+  try {
+    const res = await fetch('/api/data');
+    if (!res.ok) return;
+    const raw = await res.json();
+    const hash = JSON.stringify(raw.teams.map(t => t.projects.length + ':' + t.projects.reduce((s,p) => s + p.weeklyMinutes, 0)));
+    if (hash !== _lastDataHash) {
+      _lastDataHash = hash;
+      raw.teams.forEach(t => Object.assign(t, TEAM_CONFIG[t.id] || TEAM_CONFIG.support));
+      DATA = raw;
+      render();
+    }
+  } catch (e) { /* silent retry next interval */ }
+}, 10000);
 </script>
 
 </body>
