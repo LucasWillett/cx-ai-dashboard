@@ -836,7 +836,7 @@ function computeStats() {
     totalPeople,
     teamsWithProjects: DATA.teams.filter(t => t.projects.length > 0).length,
     avgPerPerson: (totalMinutes / 60 / totalPeople).toFixed(1),
-    competitionActive: !!start
+    competitionActive: !!getCompetitionStart()
   };
 }
 
