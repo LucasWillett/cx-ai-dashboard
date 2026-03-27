@@ -193,7 +193,7 @@ def add_project(name, description, weekly_minutes, team_id, submitter_id):
             'description': description,
             'weeklyMinutes': weekly_minutes,
             'owner': f'<@{submitter_id}>',
-        }, timeout=30)
+        }, timeout=60)
     except Exception as e:
         print(f"Render push failed (non-blocking): {e}")
 
@@ -212,10 +212,10 @@ def post(channel, text, thread_ts=None):
         print(f"Error posting: {e}")
 
 
-def handle_message(event):
+def handle_message(event, channel_id=None):
     """Process a single message event."""
     text = event.get('text', '').strip()
-    channel = event.get('channel')
+    channel = channel_id or event.get('channel')
     user = event.get('user', '')
     ts = event.get('ts', '')
     thread_ts = event.get('thread_ts')
@@ -287,6 +287,9 @@ def handle_message(event):
     if re.match(r'/?ai[- ]?win', text_lower):
         # Extract project name — everything after the trigger
         name = re.sub(r'^/?ai[- ]?win:?\s*', '', text, flags=re.IGNORECASE).strip()
+        # Strip MCP/Slack attribution suffixes
+        name = re.sub(r'\s*\*Sent using\*.*$', '', name, flags=re.DOTALL).strip()
+        name = re.sub(r'\s*<@[^>]+>.*$', '', name).strip()
 
         # Strip pipe-delimited format if someone uses the old format (still works)
         if '|' in name:
@@ -380,7 +383,7 @@ def poll_messages():
                 messages = resp.get('messages', [])
                 for msg in sorted(messages, key=lambda m: m.get('ts', '0')):
                     if msg.get('ts', '0') > last_ts[ch_id]:
-                        handle_message(msg)
+                        handle_message(msg, channel_id=ch_id)
                         last_ts[ch_id] = msg['ts']
 
                 # Check active intake threads for replies
@@ -406,7 +409,7 @@ def poll_messages():
                             if not intake.get('last_processed') or msg['ts'] > intake['last_processed']:
                                 intake['last_processed'] = msg['ts']
                                 msg['thread_ts'] = thread_ts
-                                handle_message(msg)
+                                handle_message(msg, channel_id=ch_id)
                     except SlackApiError:
                         pass
 
