@@ -727,7 +727,9 @@ const TEAM_CONFIG = {
   exec:    { color: "#ce93d8", barClass: "bar-exec",    cardClass: "exec-color" },
   support: { color: "#4fc3f7", barClass: "bar-support", cardClass: "support-color" },
   pmo:     { color: "#81c784", barClass: "bar-pmo",     cardClass: "pmo-color" },
-  cs:      { color: "#ffb74d", barClass: "bar-cs",      cardClass: "cs-color" }
+  cs:      { color: "#ffb74d", barClass: "bar-cs",      cardClass: "cs-color" },
+  'cs-ryan':  { color: "#ffb74d", barClass: "bar-cs",  cardClass: "cs-color" },
+  'cs-jenny': { color: "#ff8a65", barClass: "bar-cs",  cardClass: "cs-color" }
 };
 
 let DATA = null;
@@ -779,7 +781,8 @@ const FALLBACK_DATA = {
       { name: "Tour Opener", description: "Disabled license audit — classifies what end users actually see", weeklyMinutes: 0, owner: "Lucas Willett", status: "production", since: "2026-03" }
     ]},
     { id: "pmo", name: "Project Management", lead: "Jackie George", leadTitle: "Director, Project Management", members: ["Jackie George", "Cassandra Rowland", "Jakeyla Cowlin", "Jameika Baysinger", "Kassi Fitzpatrick"], ...TEAM_CONFIG.pmo, projects: [] },
-    { id: "cs", name: "Customer Success", lead: "Ryan Schwartz", leadTitle: "Sr. Director, Customer Success", members: ["Ryan Schwartz", "Jennifer Schiraldi", "Emily Jurden", "Bronwyn Neale", "Gabrielle Regidor", "Michael Estrada", "Desiree Crews", "Mellisa Blakemore", "Travis Shannon", "Nicole Garder", "Ryan Lavelle", "Sarah Urbas"], ...TEAM_CONFIG.cs, projects: [] }
+    { id: "cs-ryan", name: "CS — Ryan's Team", lead: "Ryan Schwartz", leadTitle: "Sr. Director, Customer Success", members: ["Ryan Schwartz", "Emily Jurden", "Nicole Garder", "Ryan Lavelle", "Sarah Urbas"], ...TEAM_CONFIG['cs-ryan'], projects: [] },
+    { id: "cs-jenny", name: "CS — Jenny's Team", lead: "Jenny Kosta", leadTitle: "CX Success Manager", members: ["Jenny Kosta", "Bronwyn Neale", "Gabrielle Regidor", "Mellisa Blakemore", "Desiree Crews", "Michael Estrada", "Travis Shannon"], ...TEAM_CONFIG['cs-jenny'], projects: [] }
   ]
 };
 
@@ -919,8 +922,8 @@ function render() {
   const kpiRow = document.getElementById('kpiRow');
   const kpis = [
     { value: competingPeople, label: 'People', sub: `${competingTeamsActive} of ${teams.length} teams active` },
-    { value: (parseFloat(stats.weeklyHours) / competingPeople).toFixed(1), label: 'Avg hrs/person/wk', sub: 'Across competing teams' },
-    { value: '$' + (parseFloat(stats.annualHours) * 45).toLocaleString(), label: 'Est. Annual Value', sub: 'At $45/hr loaded cost' },
+    { value: (parseFloat(stats.weeklyHours) / competingPeople).toFixed(1), label: 'Avg hrs/person/wk', sub: 'Across contributing teams' },
+    { value: '$' + (parseFloat(stats.annualHours) * 35).toLocaleString(), label: 'Est. Annual Value', sub: 'At $35/hr loaded cost' },
     { value: Math.round(parseFloat(stats.weeklyHours) / 40 * 100) + '%', label: 'FTE Equivalent', sub: `${(parseFloat(stats.weeklyHours) / 40).toFixed(1)} full-time employees` }
   ];
   kpiRow.innerHTML = kpis.map(k => `

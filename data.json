@@ -164,23 +164,32 @@
       "projects": []
     },
     {
-      "id": "cs",
-      "name": "Customer Success",
+      "id": "cs-ryan",
+      "name": "CS — Ryan's Team",
       "lead": "Ryan Schwartz",
       "leadTitle": "Sr. Director, Customer Success",
       "members": [
         "Ryan Schwartz",
-        "Jennifer Schiraldi",
         "Emily Jurden",
-        "Bronwyn Neale",
-        "Gabrielle Regidor",
-        "Michael Estrada",
-        "Desiree Crews",
-        "Mellisa Blakemore",
-        "Travis Shannon",
         "Nicole Garder",
         "Ryan Lavelle",
         "Sarah Urbas"
+      ],
+      "projects": []
+    },
+    {
+      "id": "cs-jenny",
+      "name": "CS — Jenny's Team",
+      "lead": "Jenny Kosta",
+      "leadTitle": "CX Success Manager",
+      "members": [
+        "Jenny Kosta",
+        "Bronwyn Neale",
+        "Gabrielle Regidor",
+        "Mellisa Blakemore",
+        "Desiree Crews",
+        "Michael Estrada",
+        "Travis Shannon"
       ],
       "projects": []
     }

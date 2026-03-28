@@ -21,10 +21,11 @@ from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
 # Config
-SLACK_BOT_TOKEN = os.environ.get('CX_DASHBOARD_BOT_TOKEN', '')  # Dedicated CX AI Tracker app
+# Shared TourFinder token for demo (cx-directors is private, needs groups:history)
+SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN', '')
 # Channel progression — demo in cx-directors, go-live in cx-internal
 # NOTE: ai-in-action intake_bot.py also handles "ai win:" — don't overlap channels
-STAGE = "test"  # "test", "demo", "prod"
+STAGE = "demo"  # "test", "demo", "prod"
 CHANNELS = {
     "test": {'C0ANH6WKU8N': 'cs-bot-testing'},      # No overlap with ai-in-action test channels
     "demo": {'C06432E9H36': 'cx-directors'},
@@ -33,14 +34,16 @@ CHANNELS = {
 LISTEN_CHANNELS = CHANNELS[STAGE]
 DATA_FILE = Path(__file__).parent / 'data.json'
 RENDER_URL = 'https://cx-ai-dashboard.onrender.com'
-POLL_INTERVAL = 15  # seconds — shared token, don't hammer
+POLL_INTERVAL = 20  # seconds — shared token, don't hammer
 
 # Team aliases for matching
 TEAM_ALIASES = {
     'exec': 'exec', 'executive': 'exec', 'kevin': 'exec',
     'support': 'support', 'sup': 'support',
     'pmo': 'pmo', 'project management': 'pmo', 'pm': 'pmo',
-    'cs': 'cs', 'customer success': 'cs', 'success': 'cs',
+    'cs': 'cs-ryan', 'customer success': 'cs-ryan', 'success': 'cs-ryan',
+    "ryan": "cs-ryan", "ryan's team": "cs-ryan",
+    "jenny": "cs-jenny", "jenny's team": "cs-jenny",
 }
 
 # Map Slack user IDs to teams (populated from data.json members + known IDs)
@@ -436,6 +439,12 @@ def poll_messages():
 
 if __name__ == '__main__':
     if not SLACK_BOT_TOKEN:
-        print("Set CX_DASHBOARD_BOT_TOKEN environment variable")
+        print("Set SLACK_BOT_TOKEN environment variable")
         exit(1)
+    # Log identity at startup
+    try:
+        auth = client.auth_test()
+        print(f"Authenticated as: {auth['user']} ({auth['user_id']})")
+    except Exception as e:
+        print(f"Auth check failed: {e}")
     poll_messages()
