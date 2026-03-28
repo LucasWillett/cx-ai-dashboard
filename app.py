@@ -105,7 +105,7 @@ def add_project():
     if any(p['name'].lower() == payload['name'].lower() for p in team['projects']):
         return jsonify({'error': f"Project '{payload['name']}' already exists in {team['name']}"}), 409
 
-    team['projects'].append({
+    project = {
         'name': payload['name'],
         'description': payload['description'],
         'weeklyMinutes': int(payload['weeklyMinutes']),
@@ -113,6 +113,22 @@ def add_project():
         'status': payload.get('status', 'production'),
         'since': datetime.now(timezone.utc).strftime('%Y-%m'),
         'addedDate': datetime.now(timezone.utc).strftime('%Y-%m-%d'),
+    }
+    # Enriched fields from intake bot
+    for field in ['frequency', 'rawMinutes', 'confluenceUrl']:
+        if payload.get(field):
+            project[field] = payload[field]
+
+    team['projects'].append(project)
+
+    # Activity log
+    activity = data.setdefault('activity', [])
+    activity.insert(0, {
+        'timestamp': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'event': f"{payload['name']} — {payload['description'][:100]}",
+        'type': 'deploy',
+        'contributor': payload['owner'],
+        'team': payload['team'],
     })
 
     save_data(data)

@@ -4,7 +4,7 @@
     "org": "Customer Experience",
     "leader": "Kevin Huang",
     "leaderTitle": "SVP, Customer Experience",
-    "lastUpdated": "2026-03-27T12:00:00Z",
+    "lastUpdated": "2026-03-27T18:28:50Z",
     "competitionStartDate": "2026-01-01"
   },
   "teams": [
@@ -165,7 +165,7 @@
     },
     {
       "id": "cs-ryan",
-      "name": "CS — Ryan's Team",
+      "name": "CS \u2014 Ryan's Team",
       "lead": "Ryan Schwartz",
       "leadTitle": "Sr. Director, Customer Success",
       "members": [
@@ -179,7 +179,7 @@
     },
     {
       "id": "cs-jenny",
-      "name": "CS — Jenny's Team",
+      "name": "CS \u2014 Jenny's Team",
       "lead": "Jenny Kosta",
       "leadTitle": "CX Success Manager",
       "members": [
@@ -192,6 +192,194 @@
         "Travis Shannon"
       ],
       "projects": []
+    }
+  ],
+  "badgeLadder": [
+    {
+      "id": "first-win",
+      "label": "First Win",
+      "description": "Logged your first AI project",
+      "threshold": 1,
+      "type": "projects",
+      "icon": ":blob-wave:",
+      "html": "\u2b50"
+    },
+    {
+      "id": "hat-trick",
+      "label": "Hat Trick",
+      "description": "3 projects shipped",
+      "threshold": 3,
+      "type": "projects",
+      "icon": ":meow_salute:",
+      "html": "\ud83c\udfa9"
+    },
+    {
+      "id": "high-five",
+      "label": "High Five",
+      "description": "5 projects shipped",
+      "threshold": 5,
+      "type": "projects",
+      "icon": ":blob-hearts:",
+      "html": "\u270b"
+    },
+    {
+      "id": "double-digits",
+      "label": "Double Digits",
+      "description": "10 projects shipped",
+      "threshold": 10,
+      "type": "projects",
+      "icon": ":meow_detective:",
+      "html": "\ud83d\udd1f"
+    },
+    {
+      "id": "baker-dozen",
+      "label": "Baker's Dozen",
+      "description": "13 projects shipped",
+      "threshold": 13,
+      "type": "projects",
+      "icon": ":party_blob:",
+      "html": "\ud83c\udf5e"
+    },
+    {
+      "id": "score",
+      "label": "The Score",
+      "description": "20 projects shipped",
+      "threshold": 20,
+      "type": "projects",
+      "icon": ":meow-hehehe:",
+      "html": "\ud83c\udfc6"
+    },
+    {
+      "id": "fifty-club",
+      "label": "50 Club",
+      "description": "50 projects shipped",
+      "threshold": 50,
+      "type": "projects",
+      "icon": ":blob-heart:",
+      "html": "\ud83d\udc8e"
+    },
+    {
+      "id": "century",
+      "label": "Century",
+      "description": "100 projects shipped",
+      "threshold": 100,
+      "type": "projects",
+      "icon": ":meow_heart:",
+      "html": "\ud83d\ude80"
+    },
+    {
+      "id": "week-1",
+      "label": "Week 1 Builder",
+      "description": "Shipped in the first week",
+      "threshold": 1,
+      "type": "special",
+      "icon": ":blob_cozy:",
+      "html": "\ud83c\udf1f"
+    },
+    {
+      "id": "back-to-back",
+      "label": "Back to Back",
+      "description": "2 projects in consecutive weeks",
+      "threshold": 2,
+      "type": "streak",
+      "icon": ":meow_this_is_fine:",
+      "html": "\ud83d\udd25"
+    },
+    {
+      "id": "three-peat",
+      "label": "Three-Peat",
+      "description": "3 consecutive weeks shipping",
+      "threshold": 3,
+      "type": "streak",
+      "icon": ":blob-wave:",
+      "html": "\ud83e\udd29"
+    },
+    {
+      "id": "on-fire",
+      "label": "On Fire",
+      "description": "5 consecutive weeks shipping",
+      "threshold": 5,
+      "type": "streak",
+      "icon": ":meow_detective:",
+      "html": "\ud83d\udd25"
+    },
+    {
+      "id": "iron-streak",
+      "label": "Iron Streak",
+      "description": "10 consecutive weeks shipping",
+      "threshold": 10,
+      "type": "streak",
+      "icon": ":party_blob:",
+      "html": "\u26a1"
+    },
+    {
+      "id": "cross-team",
+      "label": "Assist",
+      "description": "Helped another team ship a project",
+      "threshold": 1,
+      "type": "special",
+      "icon": ":meow_salute:",
+      "html": "\ud83e\udd1d"
+    },
+    {
+      "id": "evangelist",
+      "label": "Evangelist",
+      "description": "Brought a new person onto the board",
+      "threshold": 1,
+      "type": "special",
+      "icon": ":blob-hearts:",
+      "html": "\ud83d\udce3"
+    },
+    {
+      "id": "documented",
+      "label": "Documented",
+      "description": "First project with a Confluence page",
+      "threshold": 1,
+      "type": "docs",
+      "icon": ":meow_detective:",
+      "html": "\ud83d\udcd6"
+    },
+    {
+      "id": "playbook-author",
+      "label": "Playbook Author",
+      "description": "3 projects documented on Confluence",
+      "threshold": 3,
+      "type": "docs",
+      "icon": ":blob-hearts:",
+      "html": "\ud83d\udcda"
+    },
+    {
+      "id": "blueprint",
+      "label": "Blueprint",
+      "description": "Someone replicated your documented project",
+      "threshold": 1,
+      "type": "docs",
+      "icon": ":party_blob:",
+      "html": "\ud83c\udfd7\ufe0f"
+    }
+  ],
+  "contributors": [],
+  "activity": [],
+  "milestones": [
+    {
+      "hours": 250,
+      "reached": "2026-02-20",
+      "label": "250 Hours Saved"
+    },
+    {
+      "hours": 500,
+      "reached": "2026-02-28",
+      "label": "500 Hours Saved"
+    },
+    {
+      "hours": 1000,
+      "reached": "2026-03-12",
+      "label": "1,000 Hours Saved"
+    },
+    {
+      "hours": 2500,
+      "reached": null,
+      "label": "2,500 Hours Saved"
     }
   ]
 }
