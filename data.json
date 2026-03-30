@@ -4,7 +4,7 @@
     "org": "Customer Experience",
     "leader": "Kevin Huang",
     "leaderTitle": "SVP, Customer Experience",
-    "lastUpdated": "2026-03-27T18:28:50Z",
+    "lastUpdated": "2026-03-30T16:12:00Z",
     "competitionStartDate": "2026-01-01"
   },
   "teams": [
@@ -25,6 +25,17 @@
           "status": "production",
           "since": "2026-02",
           "addedDate": "2026-02-10"
+        },
+        {
+          "name": "Composite Churn Score Rebuild",
+          "description": "AI-analyzed 3,135 accounts to build a 7-signal, 100-point predictive churn model. Went from ~0% to 72% catch rate with 5% false positives. Entire analysis, backtesting, and refinement done by AI — no team time pulled.",
+          "weeklyMinutes": 62,
+          "owner": "Kevin Huang",
+          "status": "production",
+          "frequency": "one-time",
+          "rawMinutes": 2400,
+          "since": "2026-03",
+          "addedDate": "2026-03-30"
         }
       ]
     },
