@@ -104,24 +104,6 @@
           "addedDate": "2026-01-13"
         },
         {
-          "name": "Support Triage Assistant",
-          "description": "AI triage copilot for platform migration support tickets",
-          "weeklyMinutes": 200,
-          "owner": "Lucas Willett",
-          "status": "production",
-          "since": "2026-02",
-          "addedDate": "2026-02-03"
-        },
-        {
-          "name": "Help Center Article Pipeline",
-          "description": "Slack-to-Zendesk article drafting automation",
-          "weeklyMinutes": 150,
-          "owner": "Lucas Willett",
-          "status": "production",
-          "since": "2026-02",
-          "addedDate": "2026-02-10"
-        },
-        {
           "name": "Redirect Checker",
           "description": "Nightly GA4-driven URL validation + Slack on-demand checks",
           "weeklyMinutes": 150,
@@ -129,15 +111,6 @@
           "status": "production",
           "since": "2026-01",
           "addedDate": "2026-01-20"
-        },
-        {
-          "name": "Claude Relay",
-          "description": "Multi-agent coordination between terminal and browser AI",
-          "weeklyMinutes": 120,
-          "owner": "Lucas Willett",
-          "status": "production",
-          "since": "2026-02",
-          "addedDate": "2026-02-10"
         },
         {
           "name": "Matterport Health Checker",
@@ -149,15 +122,6 @@
           "addedDate": "2026-02-24"
         },
         {
-          "name": "Helm",
-          "description": "Personal ops command center \u2014 OKRs, calendar, meeting prep, signals",
-          "weeklyMinutes": 100,
-          "owner": "Lucas Willett",
-          "status": "production",
-          "since": "2026-01",
-          "addedDate": "2026-01-27"
-        },
-        {
           "name": "Browser Automation",
           "description": "Headless Playwright scripts replacing manual screenshot workflows",
           "weeklyMinutes": 100,
@@ -165,24 +129,6 @@
           "status": "production",
           "since": "2026-02",
           "addedDate": "2026-02-17"
-        },
-        {
-          "name": "Command Bot",
-          "description": "Run any automation from phone via Slack commands",
-          "weeklyMinutes": 50,
-          "owner": "Lucas Willett",
-          "status": "production",
-          "since": "2026-02",
-          "addedDate": "2026-02-17"
-        },
-        {
-          "name": "Cvent Synergy",
-          "description": "Automated Cvent Event Diagramming intake and QA workflow",
-          "weeklyMinutes": 38,
-          "owner": "Lucas Willett",
-          "status": "production",
-          "since": "2026-03",
-          "addedDate": "2026-03-03"
         },
         {
           "name": "Incident Commander",
@@ -203,7 +149,7 @@
           "addedDate": "2026-03-10"
         },
         {
-          "name": "wired up channel distribution dashboard. The Distribution Analytics dashboard (truetour-analytics) went from a 2-tab overview to a 5-tab CX intelligence platform with Supabase",
+          "name": "Distribution Analytics Dashboard",
           "description": "provides insight to channel distribution from a top down, csm, and account level to provide strategic insight",
           "weeklyMinutes": 90,
           "owner": "Lucas Willett",
