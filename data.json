@@ -4,7 +4,7 @@
     "org": "Customer Experience",
     "leader": "Kevin Huang",
     "leaderTitle": "SVP, Customer Experience",
-    "lastUpdated": "2026-03-30T16:12:00Z",
+    "lastUpdated": "2026-03-31T10:16:40Z",
     "competitionStartDate": "2026-01-01"
   },
   "teams": [
@@ -28,7 +28,7 @@
         },
         {
           "name": "Composite Churn Score Rebuild",
-          "description": "AI-analyzed 3,135 accounts to build a 7-signal, 100-point predictive churn model. Went from ~0% to 72% catch rate with 5% false positives. Entire analysis, backtesting, and refinement done by AI — no team time pulled.",
+          "description": "AI-analyzed 3,135 accounts to build a 7-signal, 100-point predictive churn model. Went from ~0% to 72% catch rate with 5% false positives. Entire analysis, backtesting, and refinement done by AI \u2014 no team time pulled.",
           "weeklyMinutes": 62,
           "owner": "Kevin Huang",
           "status": "production",
@@ -38,6 +38,50 @@
           "addedDate": "2026-03-30"
         }
       ]
+    },
+    {
+      "id": "cs-jenny",
+      "name": "CS \u2014 Jenny's Team",
+      "lead": "Jenny Kosta",
+      "leadTitle": "CX Success Manager",
+      "members": [
+        "Jenny Kosta",
+        "Bronwyn Neale",
+        "Gabrielle Regidor",
+        "Mellisa Blakemore",
+        "Desiree Crews",
+        "Michael Estrada",
+        "Travis Shannon"
+      ],
+      "projects": []
+    },
+    {
+      "id": "pmo",
+      "name": "Project Management",
+      "lead": "Jackie George",
+      "leadTitle": "Director, Project Management",
+      "members": [
+        "Jackie George",
+        "Cassandra Rowland",
+        "Jakeyla Cowlin",
+        "Jameika Baysinger",
+        "Kassi Fitzpatrick"
+      ],
+      "projects": []
+    },
+    {
+      "id": "cs-ryan",
+      "name": "CS \u2014 Ryan's Team",
+      "lead": "Ryan Schwartz",
+      "leadTitle": "Sr. Director, Customer Success",
+      "members": [
+        "Ryan Schwartz",
+        "Emily Jurden",
+        "Nicole Garder",
+        "Ryan Lavelle",
+        "Sarah Urbas"
+      ],
+      "projects": []
     },
     {
       "id": "support",
@@ -157,52 +201,19 @@
           "status": "production",
           "since": "2026-03",
           "addedDate": "2026-03-10"
+        },
+        {
+          "name": "wired up channel distribution dashboard. The Distribution Analytics dashboard (truetour-analytics) went from a 2-tab overview to a 5-tab CX intelligence platform with Supabase",
+          "description": "provides insight to channel distribution from a top down, csm, and account level to provide strategic insight",
+          "weeklyMinutes": 90,
+          "owner": "Lucas Willett",
+          "status": "production",
+          "since": "2026-03",
+          "addedDate": "2026-03-31",
+          "frequency": "weekly",
+          "rawMinutes": 90
         }
       ]
-    },
-    {
-      "id": "pmo",
-      "name": "Project Management",
-      "lead": "Jackie George",
-      "leadTitle": "Director, Project Management",
-      "members": [
-        "Jackie George",
-        "Cassandra Rowland",
-        "Jakeyla Cowlin",
-        "Jameika Baysinger",
-        "Kassi Fitzpatrick"
-      ],
-      "projects": []
-    },
-    {
-      "id": "cs-ryan",
-      "name": "CS \u2014 Ryan's Team",
-      "lead": "Ryan Schwartz",
-      "leadTitle": "Sr. Director, Customer Success",
-      "members": [
-        "Ryan Schwartz",
-        "Emily Jurden",
-        "Nicole Garder",
-        "Ryan Lavelle",
-        "Sarah Urbas"
-      ],
-      "projects": []
-    },
-    {
-      "id": "cs-jenny",
-      "name": "CS \u2014 Jenny's Team",
-      "lead": "Jenny Kosta",
-      "leadTitle": "CX Success Manager",
-      "members": [
-        "Jenny Kosta",
-        "Bronwyn Neale",
-        "Gabrielle Regidor",
-        "Mellisa Blakemore",
-        "Desiree Crews",
-        "Michael Estrada",
-        "Travis Shannon"
-      ],
-      "projects": []
     }
   ],
   "badgeLadder": [
@@ -369,8 +380,27 @@
       "html": "\ud83c\udfd7\ufe0f"
     }
   ],
-  "contributors": [],
-  "activity": [],
+  "contributors": [
+    {
+      "name": "Lucas Willett",
+      "team": "support",
+      "avatar": "LW",
+      "joined": "2026-03-31",
+      "badges": [
+        "first-win"
+      ],
+      "role": "competitor"
+    }
+  ],
+  "activity": [
+    {
+      "timestamp": "2026-03-31T10:16:40Z",
+      "event": "wired up channel distribution dashboard. The Distribution Analytics dashboard (truetour-analytics) went from a 2-tab overview to a 5-tab CX intelligence platform with Supabase \u2014 provides insight to channel distribution from a top down, csm, and account level to provide strategi",
+      "type": "deploy",
+      "contributor": "Lucas Willett",
+      "team": "support"
+    }
+  ],
   "milestones": [
     {
       "hours": 250,
