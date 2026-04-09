@@ -7,3 +7,7 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"
+      - key: SLACK_BOT_TOKEN
+        sync: false
+      - key: SLACK_SIGNING_SECRET
+        sync: false

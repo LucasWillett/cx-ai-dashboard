@@ -4,7 +4,7 @@
     "org": "Customer Experience",
     "leader": "Kevin Huang",
     "leaderTitle": "SVP, Customer Experience",
-    "lastUpdated": "2026-03-31T10:16:40Z",
+    "lastUpdated": "2026-04-02T08:57:06Z",
     "competitionStartDate": "2026-01-01"
   },
   "teams": [
@@ -14,7 +14,9 @@
       "lead": "Kevin Huang",
       "leadTitle": "SVP, Customer Experience",
       "members": [
-        "Kevin Huang"
+        "Kevin Huang",
+        "Lucas Willett",
+        "Ryan Schwartz"
       ],
       "projects": [
         {
@@ -28,7 +30,7 @@
         },
         {
           "name": "Composite Churn Score Rebuild",
-          "description": "AI-analyzed 3,135 accounts to build a 7-signal, 100-point predictive churn model. Went from ~0% to 72% catch rate with 5% false positives. Entire analysis, backtesting, and refinement done by AI \u2014 no team time pulled.",
+          "description": "AI-analyzed 3,135 accounts to build a 7-signal, 100-point predictive churn model. Went from ~0% to 72% catch rate with 5% false positives. Entire analysis, backtesting, and refinement done by AI — no team time pulled.",
           "weeklyMinutes": 62,
           "owner": "Kevin Huang",
           "status": "production",
@@ -36,64 +38,7 @@
           "rawMinutes": 2400,
           "since": "2026-03",
           "addedDate": "2026-03-30"
-        }
-      ]
-    },
-    {
-      "id": "cs-jenny",
-      "name": "CS \u2014 Jenny's Team",
-      "lead": "Jenny Kosta",
-      "leadTitle": "CX Success Manager",
-      "members": [
-        "Jenny Kosta",
-        "Bronwyn Neale",
-        "Gabrielle Regidor",
-        "Mellisa Blakemore",
-        "Desiree Crews",
-        "Michael Estrada",
-        "Travis Shannon"
-      ],
-      "projects": []
-    },
-    {
-      "id": "pmo",
-      "name": "Project Management",
-      "lead": "Jackie George",
-      "leadTitle": "Director, Project Management",
-      "members": [
-        "Jackie George",
-        "Cassandra Rowland",
-        "Jakeyla Cowlin",
-        "Jameika Baysinger",
-        "Kassi Fitzpatrick"
-      ],
-      "projects": []
-    },
-    {
-      "id": "cs-ryan",
-      "name": "CS \u2014 Ryan's Team",
-      "lead": "Ryan Schwartz",
-      "leadTitle": "Sr. Director, Customer Success",
-      "members": [
-        "Ryan Schwartz",
-        "Emily Jurden",
-        "Nicole Garder",
-        "Ryan Lavelle",
-        "Sarah Urbas"
-      ],
-      "projects": []
-    },
-    {
-      "id": "support",
-      "name": "Support",
-      "lead": "Lucas Willett",
-      "leadTitle": "Director, Customer Support",
-      "members": [
-        "Lucas Willett",
-        "Christian Staley",
-        "Hannah Holbrook"
-      ],
-      "projects": [
+        },
         {
           "name": "TourFinder",
           "description": "Property lookups, third-party example finder, redirect mapping in Slack",
@@ -141,7 +86,7 @@
         },
         {
           "name": "Tour Opener",
-          "description": "Disabled license audit \u2014 classifies what end users actually see",
+          "description": "Disabled license audit — classifies what end users actually see",
           "weeklyMinutes": 0,
           "owner": "Lucas Willett",
           "status": "production",
@@ -160,6 +105,73 @@
           "rawMinutes": 90
         }
       ]
+    },
+    {
+      "id": "cs-jenny",
+      "name": "CS — Jenny's Team",
+      "lead": "Jenny Kosta",
+      "leadTitle": "CX Success Manager",
+      "members": [
+        "Jenny Kosta",
+        "Bronwyn Neale",
+        "Gabrielle Regidor",
+        "Mellisa Blakemore",
+        "Desiree Crews",
+        "Michael Estrada",
+        "Travis Shannon"
+      ],
+      "projects": []
+    },
+    {
+      "id": "pmo",
+      "name": "Project Management",
+      "lead": "Jackie George",
+      "leadTitle": "Director, Project Management",
+      "members": [
+        "Jackie George",
+        "Cassandra Rowland",
+        "Jakeyla Cowlin",
+        "Jameika Baysinger",
+        "Kassi Fitzpatrick"
+      ],
+      "projects": []
+    },
+    {
+      "id": "cs-ryan",
+      "name": "CS — Ryan's Team",
+      "lead": "Ryan Schwartz",
+      "leadTitle": "Sr. Director, Customer Success",
+      "members": [
+        "Ryan Schwartz",
+        "Emily Jurden",
+        "Nicole Garder",
+        "Ryan Lavelle",
+        "Sarah Urbas"
+      ],
+      "projects": []
+    },
+    {
+      "id": "support",
+      "name": "Support",
+      "lead": "Lucas Willett",
+      "leadTitle": "Director, Customer Support",
+      "members": [
+        "Christian Staley",
+        "Hannah Holbrook"
+      ],
+      "projects": [
+        {
+          "name": "NPS Excellence Recognition",
+          "description": "overall team performance",
+          "weeklyMinutes": 30,
+          "owner": "Unknown",
+          "status": "production",
+          "since": "2026-04",
+          "addedDate": "2026-04-02",
+          "frequency": "weekly",
+          "rawMinutes": 30
+        }
+      ]
     }
   ],
   "badgeLadder": [
@@ -170,7 +182,7 @@
       "threshold": 1,
       "type": "projects",
       "icon": ":blob-wave:",
-      "html": "\u2b50"
+      "html": "⭐"
     },
     {
       "id": "hat-trick",
@@ -179,7 +191,7 @@
       "threshold": 3,
       "type": "projects",
       "icon": ":meow_salute:",
-      "html": "\ud83c\udfa9"
+      "html": "🎩"
     },
     {
       "id": "high-five",
@@ -188,7 +200,7 @@
       "threshold": 5,
       "type": "projects",
       "icon": ":blob-hearts:",
-      "html": "\u270b"
+      "html": "✋"
     },
     {
       "id": "double-digits",
@@ -197,7 +209,7 @@
       "threshold": 10,
       "type": "projects",
       "icon": ":meow_detective:",
-      "html": "\ud83d\udd1f"
+      "html": "🔟"
     },
     {
       "id": "baker-dozen",
@@ -206,7 +218,7 @@
       "threshold": 13,
       "type": "projects",
       "icon": ":party_blob:",
-      "html": "\ud83c\udf5e"
+      "html": "🍞"
     },
     {
       "id": "score",
@@ -215,7 +227,7 @@
       "threshold": 20,
       "type": "projects",
       "icon": ":meow-hehehe:",
-      "html": "\ud83c\udfc6"
+      "html": "🏆"
     },
     {
       "id": "fifty-club",
@@ -224,7 +236,7 @@
       "threshold": 50,
       "type": "projects",
       "icon": ":blob-heart:",
-      "html": "\ud83d\udc8e"
+      "html": "💎"
     },
     {
       "id": "century",
@@ -233,7 +245,7 @@
       "threshold": 100,
       "type": "projects",
       "icon": ":meow_heart:",
-      "html": "\ud83d\ude80"
+      "html": "🚀"
     },
     {
       "id": "week-1",
@@ -242,7 +254,7 @@
       "threshold": 1,
       "type": "special",
       "icon": ":blob_cozy:",
-      "html": "\ud83c\udf1f"
+      "html": "🌟"
     },
     {
       "id": "back-to-back",
@@ -251,7 +263,7 @@
       "threshold": 2,
       "type": "streak",
       "icon": ":meow_this_is_fine:",
-      "html": "\ud83d\udd25"
+      "html": "🔥"
     },
     {
       "id": "three-peat",
@@ -260,7 +272,7 @@
       "threshold": 3,
       "type": "streak",
       "icon": ":blob-wave:",
-      "html": "\ud83e\udd29"
+      "html": "🤩"
     },
     {
       "id": "on-fire",
@@ -269,7 +281,7 @@
       "threshold": 5,
       "type": "streak",
       "icon": ":meow_detective:",
-      "html": "\ud83d\udd25"
+      "html": "🔥"
     },
     {
       "id": "iron-streak",
@@ -278,7 +290,7 @@
       "threshold": 10,
       "type": "streak",
       "icon": ":party_blob:",
-      "html": "\u26a1"
+      "html": "⚡"
     },
     {
       "id": "cross-team",
@@ -287,7 +299,7 @@
       "threshold": 1,
       "type": "special",
       "icon": ":meow_salute:",
-      "html": "\ud83e\udd1d"
+      "html": "🤝"
     },
     {
       "id": "evangelist",
@@ -296,7 +308,7 @@
       "threshold": 1,
       "type": "special",
       "icon": ":blob-hearts:",
-      "html": "\ud83d\udce3"
+      "html": "📣"
     },
     {
       "id": "documented",
@@ -305,7 +317,7 @@
       "threshold": 1,
       "type": "docs",
       "icon": ":meow_detective:",
-      "html": "\ud83d\udcd6"
+      "html": "📖"
     },
     {
       "id": "playbook-author",
@@ -314,7 +326,7 @@
       "threshold": 3,
       "type": "docs",
       "icon": ":blob-hearts:",
-      "html": "\ud83d\udcda"
+      "html": "📚"
     },
     {
       "id": "blueprint",
@@ -323,15 +335,25 @@
       "threshold": 1,
       "type": "docs",
       "icon": ":party_blob:",
-      "html": "\ud83c\udfd7\ufe0f"
+      "html": "🏗️"
     }
   ],
   "contributors": [
     {
       "name": "Lucas Willett",
-      "team": "support",
+      "team": "exec",
       "avatar": "LW",
       "joined": "2026-03-31",
+      "badges": [
+        "first-win"
+      ],
+      "role": "competitor"
+    },
+    {
+      "name": "Unknown",
+      "team": "support",
+      "avatar": "U",
+      "joined": "2026-04-02",
       "badges": [
         "first-win"
       ],
@@ -340,8 +362,15 @@
   ],
   "activity": [
     {
+      "timestamp": "2026-04-02T08:57:06Z",
+      "event": "NPS Excellence Recognition — overall team performance",
+      "type": "deploy",
+      "contributor": "Unknown",
+      "team": "support"
+    },
+    {
       "timestamp": "2026-03-31T10:16:40Z",
-      "event": "wired up channel distribution dashboard. The Distribution Analytics dashboard (truetour-analytics) went from a 2-tab overview to a 5-tab CX intelligence platform with Supabase \u2014 provides insight to channel distribution from a top down, csm, and account level to provide strategi",
+      "event": "wired up channel distribution dashboard. The Distribution Analytics dashboard (truetour-analytics) went from a 2-tab overview to a 5-tab CX intelligence platform with Supabase — provides insight to channel distribution from a top down, csm, and account level to provide strategi",
       "type": "deploy",
       "contributor": "Lucas Willett",
       "team": "support"
