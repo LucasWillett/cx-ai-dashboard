@@ -4,8 +4,8 @@
     "org": "Customer Experience",
     "leader": "Kevin Huang",
     "leaderTitle": "SVP, Customer Experience",
-    "lastUpdated": "2026-04-02T08:57:06Z",
-    "competitionStartDate": "2026-01-01"
+    "lastUpdated": "2026-04-17T00:00:00Z",
+    "competitionStartDate": "2026-04-17"
   },
   "teams": [
     {
@@ -18,93 +18,7 @@
         "Lucas Willett",
         "Ryan Schwartz"
       ],
-      "projects": [
-        {
-          "name": "CD Bot",
-          "description": "ChurnZero-powered property lookup bot for #channel-distribution",
-          "weeklyMinutes": 60,
-          "owner": "Kevin Huang",
-          "status": "production",
-          "since": "2026-02",
-          "addedDate": "2026-02-10"
-        },
-        {
-          "name": "Composite Churn Score Rebuild",
-          "description": "AI-analyzed 3,135 accounts to build a 7-signal, 100-point predictive churn model. Went from ~0% to 72% catch rate with 5% false positives. Entire analysis, backtesting, and refinement done by AI — no team time pulled.",
-          "weeklyMinutes": 62,
-          "owner": "Kevin Huang",
-          "status": "production",
-          "frequency": "one-time",
-          "rawMinutes": 2400,
-          "since": "2026-03",
-          "addedDate": "2026-03-30"
-        },
-        {
-          "name": "TourFinder",
-          "description": "Property lookups, third-party example finder, redirect mapping in Slack",
-          "weeklyMinutes": 450,
-          "owner": "Lucas Willett",
-          "status": "production",
-          "since": "2026-01",
-          "addedDate": "2026-01-13"
-        },
-        {
-          "name": "Redirect Checker",
-          "description": "Nightly GA4-driven URL validation + Slack on-demand checks",
-          "weeklyMinutes": 150,
-          "owner": "Lucas Willett",
-          "status": "production",
-          "since": "2026-01",
-          "addedDate": "2026-01-20"
-        },
-        {
-          "name": "Matterport Health Checker",
-          "description": "Proactive 3D model health monitoring across 20K+ models",
-          "weeklyMinutes": 120,
-          "owner": "Lucas Willett",
-          "status": "production",
-          "since": "2026-02",
-          "addedDate": "2026-02-24"
-        },
-        {
-          "name": "Browser Automation",
-          "description": "Headless Playwright scripts replacing manual screenshot workflows",
-          "weeklyMinutes": 100,
-          "owner": "Lucas Willett",
-          "status": "production",
-          "since": "2026-02",
-          "addedDate": "2026-02-17"
-        },
-        {
-          "name": "Incident Commander",
-          "description": "P1 response automation and stakeholder notification",
-          "weeklyMinutes": 30,
-          "owner": "Lucas Willett",
-          "status": "production",
-          "since": "2026-02",
-          "addedDate": "2026-02-03"
-        },
-        {
-          "name": "Tour Opener",
-          "description": "Disabled license audit — classifies what end users actually see",
-          "weeklyMinutes": 0,
-          "owner": "Lucas Willett",
-          "status": "production",
-          "since": "2026-03",
-          "addedDate": "2026-03-10"
-        },
-        {
-          "name": "Distribution Analytics Dashboard",
-          "description": "provides insight to channel distribution from a top down, csm, and account level to provide strategic insight",
-          "weeklyMinutes": 90,
-          "owner": "Lucas Willett",
-          "status": "production",
-          "since": "2026-03",
-          "addedDate": "2026-03-31",
-          "frequency": "weekly",
-          "rawMinutes": 90
-        }
-      ]
+      "projects": []
     },
     {
       "id": "cs-jenny",
@@ -159,19 +73,7 @@
         "Christian Staley",
         "Hannah Holbrook"
       ],
-      "projects": [
-        {
-          "name": "NPS Excellence Recognition",
-          "description": "overall team performance",
-          "weeklyMinutes": 30,
-          "owner": "Unknown",
-          "status": "production",
-          "since": "2026-04",
-          "addedDate": "2026-04-02",
-          "frequency": "weekly",
-          "rawMinutes": 30
-        }
-      ]
+      "projects": []
     }
   ],
   "badgeLadder": [
@@ -338,58 +240,22 @@
       "html": "🏗️"
     }
   ],
-  "contributors": [
-    {
-      "name": "Lucas Willett",
-      "team": "exec",
-      "avatar": "LW",
-      "joined": "2026-03-31",
-      "badges": [
-        "first-win"
-      ],
-      "role": "competitor"
-    },
-    {
-      "name": "Unknown",
-      "team": "support",
-      "avatar": "U",
-      "joined": "2026-04-02",
-      "badges": [
-        "first-win"
-      ],
-      "role": "competitor"
-    }
-  ],
-  "activity": [
-    {
-      "timestamp": "2026-04-02T08:57:06Z",
-      "event": "NPS Excellence Recognition — overall team performance",
-      "type": "deploy",
-      "contributor": "Unknown",
-      "team": "support"
-    },
-    {
-      "timestamp": "2026-03-31T10:16:40Z",
-      "event": "wired up channel distribution dashboard. The Distribution Analytics dashboard (truetour-analytics) went from a 2-tab overview to a 5-tab CX intelligence platform with Supabase — provides insight to channel distribution from a top down, csm, and account level to provide strategi",
-      "type": "deploy",
-      "contributor": "Lucas Willett",
-      "team": "support"
-    }
-  ],
+  "contributors": [],
+  "activity": [],
   "milestones": [
     {
       "hours": 250,
-      "reached": "2026-02-20",
+      "reached": null,
       "label": "250 Hours Saved"
     },
     {
       "hours": 500,
-      "reached": "2026-02-28",
+      "reached": null,
       "label": "500 Hours Saved"
     },
     {
       "hours": 1000,
-      "reached": "2026-03-12",
+      "reached": null,
       "label": "1,000 Hours Saved"
     },
     {
