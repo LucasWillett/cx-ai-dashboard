@@ -1,0 +1,433 @@
+{
+  "generated_at": "2026-05-26",
+  "mtd": {
+    "pageviews": 458006,
+    "sessions": 123705,
+    "start": "2026-05-01",
+    "end": "2026-05-25",
+    "days_elapsed": 26,
+    "days_in_month": 31,
+    "projected_full_month": 546084
+  },
+  "prior_month": {
+    "pageviews": 695391,
+    "label": "April",
+    "delta": -149307,
+    "delta_pct": -21.5
+  },
+  "gauge": {
+    "value": 546084,
+    "max": 1265542,
+    "decline_from_baseline_pct": 56.8,
+    "note": "Gauge shows projected full month (546,084) based on 26/31 days elapsed."
+  },
+  "daily_trend": [
+    {
+      "date": "2026-02-26",
+      "pageviews": 61901
+    },
+    {
+      "date": "2026-02-27",
+      "pageviews": 49218
+    },
+    {
+      "date": "2026-02-28",
+      "pageviews": 30870
+    },
+    {
+      "date": "2026-03-01",
+      "pageviews": 34624
+    },
+    {
+      "date": "2026-03-02",
+      "pageviews": 52928
+    },
+    {
+      "date": "2026-03-03",
+      "pageviews": 54462
+    },
+    {
+      "date": "2026-03-04",
+      "pageviews": 52122
+    },
+    {
+      "date": "2026-03-05",
+      "pageviews": 58280
+    },
+    {
+      "date": "2026-03-06",
+      "pageviews": 55734
+    },
+    {
+      "date": "2026-03-07",
+      "pageviews": 30790
+    },
+    {
+      "date": "2026-03-08",
+      "pageviews": 33712
+    },
+    {
+      "date": "2026-03-09",
+      "pageviews": 53088
+    },
+    {
+      "date": "2026-03-10",
+      "pageviews": 54544
+    },
+    {
+      "date": "2026-03-11",
+      "pageviews": 53819
+    },
+    {
+      "date": "2026-03-12",
+      "pageviews": 47453
+    },
+    {
+      "date": "2026-03-13",
+      "pageviews": 111662
+    },
+    {
+      "date": "2026-03-14",
+      "pageviews": 31577
+    },
+    {
+      "date": "2026-03-15",
+      "pageviews": 34091
+    },
+    {
+      "date": "2026-03-16",
+      "pageviews": 64093
+    },
+    {
+      "date": "2026-03-17",
+      "pageviews": 45659
+    },
+    {
+      "date": "2026-03-18",
+      "pageviews": 38482
+    },
+    {
+      "date": "2026-03-19",
+      "pageviews": 36995
+    },
+    {
+      "date": "2026-03-20",
+      "pageviews": 31677
+    },
+    {
+      "date": "2026-03-21",
+      "pageviews": 21879
+    },
+    {
+      "date": "2026-03-22",
+      "pageviews": 24099
+    },
+    {
+      "date": "2026-03-23",
+      "pageviews": 38351
+    },
+    {
+      "date": "2026-03-24",
+      "pageviews": 30801
+    },
+    {
+      "date": "2026-03-25",
+      "pageviews": 28996
+    },
+    {
+      "date": "2026-03-26",
+      "pageviews": 27883
+    },
+    {
+      "date": "2026-03-27",
+      "pageviews": 27102
+    },
+    {
+      "date": "2026-03-28",
+      "pageviews": 17452
+    },
+    {
+      "date": "2026-03-29",
+      "pageviews": 18459
+    },
+    {
+      "date": "2026-03-30",
+      "pageviews": 28001
+    },
+    {
+      "date": "2026-03-31",
+      "pageviews": 26727
+    },
+    {
+      "date": "2026-04-01",
+      "pageviews": 25364
+    },
+    {
+      "date": "2026-04-02",
+      "pageviews": 28802
+    },
+    {
+      "date": "2026-04-03",
+      "pageviews": 24824
+    },
+    {
+      "date": "2026-04-04",
+      "pageviews": 18018
+    },
+    {
+      "date": "2026-04-05",
+      "pageviews": 16000
+    },
+    {
+      "date": "2026-04-06",
+      "pageviews": 26489
+    },
+    {
+      "date": "2026-04-07",
+      "pageviews": 26333
+    },
+    {
+      "date": "2026-04-08",
+      "pageviews": 26529
+    },
+    {
+      "date": "2026-04-09",
+      "pageviews": 26372
+    },
+    {
+      "date": "2026-04-10",
+      "pageviews": 22123
+    },
+    {
+      "date": "2026-04-11",
+      "pageviews": 15529
+    },
+    {
+      "date": "2026-04-12",
+      "pageviews": 18532
+    },
+    {
+      "date": "2026-04-13",
+      "pageviews": 25629
+    },
+    {
+      "date": "2026-04-14",
+      "pageviews": 25770
+    },
+    {
+      "date": "2026-04-15",
+      "pageviews": 28414
+    },
+    {
+      "date": "2026-04-16",
+      "pageviews": 25834
+    },
+    {
+      "date": "2026-04-17",
+      "pageviews": 23026
+    },
+    {
+      "date": "2026-04-18",
+      "pageviews": 16073
+    },
+    {
+      "date": "2026-04-19",
+      "pageviews": 18986
+    },
+    {
+      "date": "2026-04-20",
+      "pageviews": 28450
+    },
+    {
+      "date": "2026-04-21",
+      "pageviews": 27921
+    },
+    {
+      "date": "2026-04-22",
+      "pageviews": 26915
+    },
+    {
+      "date": "2026-04-23",
+      "pageviews": 25751
+    },
+    {
+      "date": "2026-04-24",
+      "pageviews": 22907
+    },
+    {
+      "date": "2026-04-25",
+      "pageviews": 13450
+    },
+    {
+      "date": "2026-04-26",
+      "pageviews": 16128
+    },
+    {
+      "date": "2026-04-27",
+      "pageviews": 24434
+    },
+    {
+      "date": "2026-04-28",
+      "pageviews": 25274
+    },
+    {
+      "date": "2026-04-29",
+      "pageviews": 24285
+    },
+    {
+      "date": "2026-04-30",
+      "pageviews": 21229
+    },
+    {
+      "date": "2026-05-01",
+      "pageviews": 19045
+    },
+    {
+      "date": "2026-05-02",
+      "pageviews": 13306
+    },
+    {
+      "date": "2026-05-03",
+      "pageviews": 14383
+    },
+    {
+      "date": "2026-05-04",
+      "pageviews": 22138
+    },
+    {
+      "date": "2026-05-05",
+      "pageviews": 22197
+    },
+    {
+      "date": "2026-05-06",
+      "pageviews": 21837
+    },
+    {
+      "date": "2026-05-07",
+      "pageviews": 21880
+    },
+    {
+      "date": "2026-05-08",
+      "pageviews": 20520
+    },
+    {
+      "date": "2026-05-09",
+      "pageviews": 11921
+    },
+    {
+      "date": "2026-05-10",
+      "pageviews": 13101
+    },
+    {
+      "date": "2026-05-11",
+      "pageviews": 22955
+    },
+    {
+      "date": "2026-05-12",
+      "pageviews": 25008
+    },
+    {
+      "date": "2026-05-13",
+      "pageviews": 23291
+    },
+    {
+      "date": "2026-05-14",
+      "pageviews": 21724
+    },
+    {
+      "date": "2026-05-15",
+      "pageviews": 18958
+    },
+    {
+      "date": "2026-05-16",
+      "pageviews": 11825
+    },
+    {
+      "date": "2026-05-17",
+      "pageviews": 13354
+    },
+    {
+      "date": "2026-05-18",
+      "pageviews": 20618
+    },
+    {
+      "date": "2026-05-19",
+      "pageviews": 21712
+    },
+    {
+      "date": "2026-05-20",
+      "pageviews": 20953
+    },
+    {
+      "date": "2026-05-21",
+      "pageviews": 19974
+    },
+    {
+      "date": "2026-05-22",
+      "pageviews": 16704
+    },
+    {
+      "date": "2026-05-23",
+      "pageviews": 12185
+    },
+    {
+      "date": "2026-05-24",
+      "pageviews": 12898
+    },
+    {
+      "date": "2026-05-25",
+      "pageviews": 15519
+    },
+    {
+      "date": "2026-05-26",
+      "pageviews": 342
+    }
+  ],
+  "projection": {
+    "declining": true,
+    "mom_decline_pct": 21.5,
+    "mom_ratio": 0.785,
+    "months_to_zero": 18,
+    "zero_date": "2027-11-30",
+    "floor_pageviews": 6953,
+    "method": "exponential decay at MoM rate, effective zero = 1% of prior month"
+  },
+  "top_slugs": [
+    {
+      "slug": "hyatt-regency-maui-resort-and-spa-icms",
+      "views_this_month": 26241,
+      "views_last_month": 34403,
+      "change": -8162
+    },
+    {
+      "slug": "the-ritz-carlton-oahu-turtle-bay",
+      "views_this_month": 9859,
+      "views_last_month": 10851,
+      "change": -992
+    },
+    {
+      "slug": "rosewood-baha-mar-icms",
+      "views_this_month": 9733,
+      "views_last_month": 11558,
+      "change": -1825
+    },
+    {
+      "slug": "paradise-point-resort-spa",
+      "views_this_month": 8497,
+      "views_last_month": 1142,
+      "change": 7355
+    },
+    {
+      "slug": "andaz-miami-beach",
+      "views_this_month": 8351,
+      "views_last_month": 9882,
+      "change": -1531
+    }
+  ],
+  "monthly_totals": {
+    "2026-02": 141989,
+    "2026-03": 1265542,
+    "2026-04": 695391,
+    "2026-05": 458348
+  }
+}

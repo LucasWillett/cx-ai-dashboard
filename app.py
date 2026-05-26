@@ -21,7 +21,10 @@ from flask import Flask, jsonify, request, send_file
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
+from analytics import analytics_bp
+
 app = Flask(__name__)
+app.register_blueprint(analytics_bp, url_prefix='/analytics')
 
 # --- Slack config ---
 SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")

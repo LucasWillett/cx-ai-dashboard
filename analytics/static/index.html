@@ -1,0 +1,3165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distribution Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #030014;
+            --bg-secondary: #0a0a1a;
+            --bg-card: rgba(15, 15, 35, 0.6);
+            --bg-card-hover: rgba(25, 25, 55, 0.8);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --text-primary: #f0f0f5;
+            --text-secondary: #9090a8;
+            --text-muted: #5a5a70;
+            --accent-blue: #6366f1;
+            --accent-cyan: #22d3ee;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-orange: #f59e0b;
+            --accent-purple: #a855f7;
+            --accent-pink: #ec4899;
+            --glow-blue: rgba(99, 102, 241, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .bg-gradient {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.12), transparent),
+                radial-gradient(ellipse 60% 40% at 100% 0%, rgba(168, 85, 247, 0.08), transparent),
+                radial-gradient(ellipse 50% 30% at 0% 100%, rgba(34, 211, 238, 0.06), transparent);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        header { margin-bottom: 0; }
+
+        header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header .subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 0;
+            margin: 1.5rem 0 2rem 0;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg-primary);
+            padding-top: 0.5rem;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        .tab-btn:hover { color: var(--text-secondary); }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            border-radius: 1px;
+        }
+
+        .tab-btn .tab-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 5px;
+            margin-left: 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .tab-btn .tab-badge.red {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+        }
+        .tab-btn .tab-badge.blue {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--accent-blue);
+        }
+        .tab-btn .tab-badge.cyan {
+            background: rgba(34, 211, 238, 0.2);
+            color: var(--accent-cyan);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Stat Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-top: 2px solid transparent;
+            border-image: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)) 1;
+            border-image-slice: 1 0 0 0;
+            border-radius: 12px;
+            padding: 1.25rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Loading shimmer */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .stat-card .value.loading {
+            background: linear-gradient(90deg, var(--bg-card) 25%, rgba(99,102,241,0.08) 50%, var(--bg-card) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s ease-in-out infinite;
+            border-radius: 6px;
+            color: transparent;
+            min-height: 2.2rem;
+        }
+
+        .stat-card .label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-card .value {
+            font-size: 1.85rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 0.25rem;
+        }
+
+        .stat-card .change {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            font-weight: 500;
+        }
+
+        .stat-card .sub-detail {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
+
+        .change.up { color: var(--accent-green); }
+        .change.down { color: var(--accent-red); }
+        .change.stable { color: var(--text-muted); }
+
+        /* Platform bar */
+        .platform-bar-container { margin-top: 0.5rem; }
+        .platform-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 0.35rem; }
+        .platform-bar .vm-segment { background: var(--accent-blue); }
+        .platform-bar .tt-segment { background: var(--accent-cyan); }
+        .platform-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); }
+        .platform-labels .vm-label { color: var(--accent-blue); }
+        .platform-labels .tt-label { color: var(--accent-cyan); }
+
+        /* Section title */
+        .section-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Alerts */
+        .alerts-section { margin-bottom: 2rem; }
+        .alerts-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+        .alert-pill {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.78rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .alert-pill.surge { border-color: rgba(16, 185, 129, 0.3); color: var(--accent-green); }
+        .alert-pill.drop { border-color: rgba(239, 68, 68, 0.3); color: var(--accent-red); }
+        .alert-pill.new_channel { border-color: rgba(99, 102, 241, 0.3); color: var(--accent-blue); }
+        .alert-pill .alert-name { font-weight: 600; color: var(--text-primary); }
+        .alert-pill .alert-detail { color: var(--text-muted); }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-card.full-width { grid-column: 1 / -1; }
+
+        .chart-card h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .chart-wrapper { position: relative; width: 100%; }
+
+        /* Properties Table */
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+
+        th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover { color: var(--text-secondary); }
+
+        td {
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            color: var(--text-secondary);
+        }
+
+        tr:hover td { color: var(--text-primary); }
+
+        td.views-col {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+        }
+
+        .brand-tag {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            background: rgba(99, 102, 241, 0.15);
+            border-radius: 4px;
+            color: var(--accent-blue);
+        }
+
+        .channel-tag {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            background: rgba(16, 185, 129, 0.15);
+            border-radius: 4px;
+            color: var(--accent-green);
+        }
+
+        /* ============ SIGNALS TAB ============ */
+        .signals-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .signal-stat {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .signal-stat .label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .signal-stat .value {
+            font-size: 1.85rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 0.25rem;
+        }
+
+        .signal-stat .sub-detail {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
+
+        /* Signal filter bar */
+        .signal-filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.4rem 0.9rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-muted);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover { border-color: var(--border-hover); color: var(--text-secondary); }
+        .filter-btn.active { border-color: var(--accent-blue); color: var(--accent-blue); background: rgba(99, 102, 241, 0.1); }
+
+        /* Signal rows */
+        .signals-section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            margin-top: 2rem;
+        }
+
+        .collapsible-toggle {
+            cursor: pointer;
+            user-select: none;
+        }
+        .collapsible-toggle:hover h3 { opacity: 0.8; }
+        .collapse-arrow {
+            font-size: 0.7em;
+            transition: transform 0.2s ease;
+            display: inline-block;
+        }
+        .collapsible-section.collapsed .collapse-arrow {
+            transform: rotate(-90deg);
+        }
+        .collapsible-section.collapsed .collapsible-body {
+            display: none;
+        }
+
+        .signals-section-title h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .signals-section-title .count-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.15rem 0.5rem;
+            border-radius: 8px;
+        }
+
+        .signal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.5rem;
+            display: grid;
+            grid-template-columns: 2fr 0.8fr 120px 0.8fr 0.6fr;
+            align-items: center;
+            gap: 1rem;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .signal-card:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+        }
+
+        .signal-card.severity-high { border-left: 3px solid var(--accent-red); }
+        .signal-card.severity-high.surge-card { border-left: 3px solid var(--accent-green); }
+        .signal-card.severity-medium { border-left: 3px solid var(--accent-orange); }
+        .signal-card.severity-medium.surge-card { border-left: 3px solid var(--accent-cyan); }
+        .signal-card.severity-low { border-left: 3px solid var(--border-hover); }
+
+        .signal-channel {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .signal-channel .name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .signal-channel .cat-tag {
+            font-size: 0.68rem;
+            padding: 0.1rem 0.45rem;
+            border-radius: 4px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .cat-tag.third_party { background: rgba(34, 211, 238, 0.15); color: var(--accent-cyan); }
+        .cat-tag.brand_website { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .cat-tag.property_website { background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); }
+        .cat-tag.search { background: rgba(168, 85, 247, 0.15); color: var(--accent-purple); }
+        .cat-tag.social { background: rgba(236, 72, 153, 0.15); color: var(--accent-pink); }
+        .cat-tag.ai { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+        .cat-tag.platform { background: rgba(99, 102, 241, 0.15); color: var(--accent-blue); }
+
+        .signal-volume {
+            text-align: right;
+        }
+
+        .signal-volume .current {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .signal-volume .previous {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .signal-sparkline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .signal-sparkline canvas {
+            display: block;
+        }
+
+        .signal-change {
+            text-align: right;
+        }
+
+        .signal-change .pct {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .signal-change .abs-diff {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .signal-severity {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .severity-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .severity-dot.high {
+            background: var(--accent-red);
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+        }
+
+        .severity-dot.high.surge {
+            background: var(--accent-green);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+        }
+
+        .severity-dot.medium {
+            background: var(--accent-orange);
+            box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
+        }
+
+        .severity-dot.low {
+            background: var(--text-muted);
+        }
+
+        .severity-dot.high::after {
+            content: '';
+            position: absolute;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            border-radius: 50%;
+            border: 1px solid currentColor;
+            opacity: 0.3;
+            animation: pulse-ring 2s ease-out infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 0.3; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
+
+        /* Signal table header */
+        .signal-header {
+            display: grid;
+            grid-template-columns: 2fr 0.8fr 120px 0.8fr 0.6fr;
+            gap: 1rem;
+            padding: 0 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .signal-header span {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .signal-header span:nth-child(2),
+        .signal-header span:nth-child(4) { text-align: right; }
+        .signal-header span:nth-child(3),
+        .signal-header span:nth-child(5) { text-align: center; }
+
+        .loading { text-align: center; padding: 3rem; color: var(--text-muted); }
+
+        /* Distribution Channels Tab */
+        .ch-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 0.8fr 120px 1fr;
+            gap: 1rem;
+            padding: 0 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .ch-header span {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .ch-header span:nth-child(2),
+        .ch-header span:nth-child(3) { text-align: right; }
+        .ch-header span:nth-child(4) { text-align: center; }
+        .ch-card {
+            display: grid;
+            grid-template-columns: 2fr 1fr 0.8fr 120px 1fr;
+            gap: 1rem;
+            padding: 0.85rem 1.25rem;
+            margin-bottom: 0.4rem;
+            border-radius: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            align-items: center;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .ch-card:hover { background: var(--bg-card-hover); border-color: var(--border-hover); }
+        .ch-card.trend-up { border-left: 3px solid var(--accent-green); }
+        .ch-card.trend-down { border-left: 3px solid var(--accent-red); }
+        .ch-card.trend-stable { border-left: 3px solid var(--border-hover); }
+        .ch-card.trend-new { border-left: 3px solid var(--accent-cyan); }
+        .ch-card .ch-name { font-weight: 600; font-size: 0.9rem; }
+        .ch-card .ch-volume { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; text-align: right; }
+        .ch-card .ch-prev { font-size: 0.7rem; color: var(--text-muted); text-align: right; }
+        .ch-card .ch-props { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; text-align: right; color: var(--text-secondary); }
+        .ch-card .ch-change { text-align: right; }
+        .ch-card .ch-pct { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; }
+        .ch-card .ch-diff { font-size: 0.7rem; color: var(--text-muted); }
+
+        /* Insight Cards (Overview) */
+        .insights-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .insight-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            transition: border-color 0.2s, transform 0.15s;
+        }
+        .insight-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+        .insight-card .insight-icon { font-size: 1.2rem; margin-bottom: 0.4rem; }
+        .insight-card .insight-stat { font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; font-weight: 700; }
+        .insight-card .insight-label { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem; }
+        .insight-card .insight-link { font-size: 0.7rem; color: var(--accent-cyan); margin-top: 0.5rem; }
+
+        /* Key Takeaways */
+        .cx-takeaways {
+            background: rgba(99, 102, 241, 0.04);
+            border: 1px solid rgba(99, 102, 241, 0.12);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+        .cx-takeaways .takeaway {
+            font-size: 0.85rem;
+            padding: 0.3rem 0;
+            color: var(--text-secondary);
+        }
+        .cx-takeaways .takeaway strong { color: var(--text-primary); }
+        .cx-takeaways .takeaway .num { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .cx-takeaways h4 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Score Lookup */
+        .score-lookup {
+            margin-bottom: 2rem;
+        }
+        .score-lookup-input-wrap {
+            position: relative;
+        }
+        .score-lookup input {
+            width: 100%;
+            padding: 0.85rem 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .score-lookup input:focus {
+            border-color: var(--accent-blue);
+        }
+        .score-lookup input::placeholder {
+            color: var(--text-muted);
+        }
+        #score-lookup-result {
+            margin-top: 0.75rem;
+        }
+        .score-result-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1.25rem;
+            align-items: start;
+        }
+        .score-result-card .score-big {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.4rem;
+        }
+        .score-result-card .score-big.high { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .score-result-card .score-big.mid { background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); }
+        .score-result-card .score-big.low { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+        .score-result-details h4 { font-size: 1rem; margin-bottom: 0.25rem; }
+        .score-result-details .meta { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.75rem; }
+        .score-result-details .breakdown { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .score-result-details .factor { font-size: 0.8rem; }
+        .score-result-details .factor-label { color: var(--text-muted); text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.05em; }
+        .score-result-details .factor-value { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; margin-top: 2px; }
+
+        /* Collapsible Sections */
+        .collapsible { cursor: pointer; user-select: none; }
+        .collapsible:hover { opacity: 0.85; }
+        .collapse-arrow {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+        .collapsible.collapsed .collapse-arrow { transform: rotate(-90deg); }
+        .collapsible-body {
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.2s ease;
+            max-height: 200000px;
+        }
+        .collapsible-body.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        /* Bounded scroll list — caps long lists at ~60vh so multiple sections fit on screen
+           and one open list doesn't push subsequent ones off the page. */
+        .scroll-list {
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 6px;
+            /* breathing room so the last card isn't flush against the scrollbar */
+        }
+        .scroll-list::-webkit-scrollbar { width: 8px; }
+        .scroll-list::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 4px; }
+        .scroll-list::-webkit-scrollbar-track { background: transparent; }
+
+        /* CSM detail panel: cap so expanding a portfolio with many entries doesn't push the next CSM off-screen */
+        .csm-detail-panel {
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+        .csm-detail-panel::-webkit-scrollbar { width: 6px; }
+        .csm-detail-panel::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
+
+        /* Export CSV link */
+        .export-csv-link {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 2px 8px;
+            border: 1px solid var(--bg-card-hover);
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .export-csv-link:hover { color: var(--text); background: var(--bg-card-hover); }
+
+        /* Brand Rollup */
+        .brand-header {
+            grid-template-columns: 2fr 1fr 0.8fr 1fr 1fr;
+        }
+        .brand-card {
+            display: grid;
+            grid-template-columns: 2fr 1fr 0.8fr 1fr 1fr;
+            gap: 1rem;
+            padding: 0.85rem 1.25rem;
+            margin-bottom: 0.4rem;
+            border-radius: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            align-items: center;
+        }
+        .brand-card:hover { background: var(--bg-card-hover); }
+        .brand-card.trend-up { border-left: 3px solid var(--accent-green); }
+        .brand-card.trend-down { border-left: 3px solid var(--accent-red); }
+        .brand-card.trend-stable { border-left: 3px solid var(--border-hover); }
+
+        /* AI Spotlight */
+        .ai-spotlight-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 3px solid rgba(249, 115, 22, 0.4);
+            border-radius: 10px;
+            padding: 1.25rem;
+            opacity: 0.85;
+        }
+        .ai-spotlight-card .ai-total { font-size: 1.5rem; font-weight: 700; color: var(--accent-orange); }
+        .ai-spotlight-card .ai-platforms { margin: 0.5rem 0; color: var(--text-secondary); font-size: 0.85rem; }
+        .ai-spotlight-card .ai-props { margin-top: 0.75rem; }
+        .ai-spotlight-card .ai-prop { display: flex; justify-content: space-between; padding: 0.3rem 0; font-size: 0.85rem; border-bottom: 1px solid var(--border); }
+
+        /* CSM Portfolios */
+        .csm-header {
+            display: grid;
+            grid-template-columns: 1.5fr 2fr 1fr 1fr 0.6fr;
+            gap: 1rem;
+            padding: 0 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .csm-header span {
+            font-size: 0.7rem; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .csm-header span:nth-child(n+2) { text-align: right; }
+        .csm-card {
+            display: grid;
+            grid-template-columns: 1.5fr 2fr 1fr 1fr 0.6fr;
+            gap: 1rem;
+            padding: 0.85rem 1.25rem;
+            margin-bottom: 0.4rem;
+            border-radius: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            align-items: center;
+        }
+        .csm-card:hover { background: var(--bg-card-hover); }
+        .csm-card .csm-name { font-weight: 600; font-size: 0.9rem; }
+        .csm-card .csm-num { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; text-align: right; }
+        .csm-card .csm-arr { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; text-align: right; }
+        .csm-detail-panel {
+            background: rgba(10, 10, 25, 0.5);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            margin-top: -0.4rem;
+            margin-bottom: 0.4rem;
+            padding: 0.5rem 0;
+        }
+        .csm-detail-row {
+            display: grid;
+            grid-template-columns: 3fr 1fr 0.8fr;
+            gap: 1rem;
+            padding: 0.35rem 1.5rem;
+            font-size: 0.8rem;
+            border-left: 3px solid transparent;
+        }
+        .csm-detail-row.opp { border-left-color: var(--accent-red); }
+        .csm-detail-row.win { border-left-color: var(--accent-green); }
+        .csm-detail-row.dark { border-left-color: var(--accent-orange); }
+        .csm-detail-name { color: var(--text-primary); }
+        .csm-detail-arr { font-family: 'JetBrains Mono', monospace; text-align: right; color: var(--text-secondary); }
+        .csm-detail-pct { font-family: 'JetBrains Mono', monospace; text-align: right; }
+
+        /* Distribution Scores */
+        .score-header {
+            display: grid;
+            grid-template-columns: 0.6fr 2.5fr 0.8fr 1fr 1fr;
+            gap: 1rem;
+            padding: 0 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .score-header span {
+            font-size: 0.7rem; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .score-header span:nth-child(n+3) { text-align: right; }
+        .score-card {
+            display: grid;
+            grid-template-columns: 0.6fr 2.5fr 0.8fr 1fr 1fr;
+            gap: 1rem;
+            padding: 0.85rem 1.25rem;
+            margin-bottom: 0.4rem;
+            border-radius: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            align-items: center;
+        }
+        .score-card:hover { background: var(--bg-card-hover); }
+        .score-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 40px; height: 40px; border-radius: 50%;
+            font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.85rem;
+        }
+        .score-badge.high { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .score-badge.mid { background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); }
+        .score-badge.low { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+
+        /* CX Leadership Tab */
+        .cx-header {
+            display: grid;
+            grid-template-columns: 2.5fr 0.8fr 1fr 0.8fr 1.5fr;
+            gap: 1rem;
+            padding: 0 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .cx-dark-header {
+            grid-template-columns: 2.5fr 0.8fr 1fr 1.5fr;
+        }
+        .cx-header span {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .cx-header span:nth-child(2) { text-align: right; }
+        .cx-card {
+            display: grid;
+            grid-template-columns: 2.5fr 0.8fr 1fr 0.8fr 1.5fr;
+            gap: 1rem;
+            padding: 0.85rem 1.25rem;
+            margin-bottom: 0.4rem;
+            border-radius: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            align-items: center;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .cx-card:hover { background: var(--bg-card-hover); border-color: var(--border-hover); }
+        .cx-card.win { border-left: 3px solid var(--accent-green); }
+        .cx-card.opp { border-left: 3px solid var(--accent-red); }
+        .cx-card.dark { border-left: 3px solid var(--accent-orange); grid-template-columns: 2.5fr 0.8fr 1fr 1.5fr; }
+        .cx-card .prop-name { font-weight: 600; font-size: 0.9rem; }
+        .cx-card .prop-location { font-size: 0.7rem; color: var(--text-muted); }
+        .cx-card .prop-brand { font-size: 0.7rem; color: var(--text-secondary); }
+        .cx-card .arr-value { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; text-align: right; }
+        .cx-card .csm-name { font-size: 0.85rem; color: var(--text-secondary); }
+        .cx-card .change-value { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; text-align: right; }
+        .cx-card .driver { font-size: 0.8rem; }
+        .cx-card .driver .channel { font-weight: 500; }
+        .cx-card .driver .detail { font-size: 0.7rem; color: var(--text-muted); }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid, .signals-summary { grid-template-columns: repeat(2, 1fr); }
+            .charts-grid { grid-template-columns: 1fr; }
+            .signal-card { grid-template-columns: 1fr 1fr; }
+            .signal-header { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <div class="container">
+        <header>
+            <h1>Distribution Analytics</h1>
+            <div class="subtitle" id="last-updated">Loading...</div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="overview">Overview</button>
+            <button class="tab-btn" data-tab="cx">CX Leadership <span class="tab-badge blue" id="cx-badge"></span></button>
+            <button class="tab-btn" data-tab="channels">Channels <span class="tab-badge cyan" id="channels-badge"></span></button>
+            <!-- Signals tab removed — merged into Overview as "Notable This Period" -->
+            <button class="tab-btn" data-tab="seasonal">What to Expect</button>
+            <button class="tab-btn" data-tab="tt8sunset">Legacy Sunset</button>
+        </nav>
+
+        <!-- ============ OVERVIEW TAB ============ -->
+        <div class="tab-content active" id="tab-overview">
+            <!-- Stat Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="label">Pageviews (30d)</div>
+                    <div class="value loading" id="stat-views">&nbsp;</div>
+                    <div class="change" id="stat-views-change"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">vs Previous 30d</div>
+                    <div class="value loading" id="stat-change">&nbsp;</div>
+                    <div class="sub-detail" id="stat-prev-total"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Properties with Traffic</div>
+                    <div class="value loading" id="stat-properties">&nbsp;</div>
+                    <div class="change" id="stat-properties-total"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Platform Split</div>
+                    <div class="platform-bar-container" id="platform-split">
+                        <div class="platform-bar">
+                            <div class="vm-segment" id="vm-bar" style="width:50%"></div>
+                            <div class="tt-segment" id="tt-bar" style="width:50%"></div>
+                        </div>
+                        <div class="platform-labels">
+                            <span class="vm-label" id="vm-pct">visitingmedia.com -</span>
+                            <span class="tt-label" id="tt-pct">truetour.app -</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div class="alerts-section" id="alerts-section" style="display:none">
+                <div class="section-title">Trend Alerts</div>
+                <div class="alerts-list" id="alerts-list"></div>
+            </div>
+
+            <!-- Row 1: Category Overview + Weekly Total -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Pageviews by Category (30d)</h3>
+                    <div class="chart-wrapper"><canvas id="category-chart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <h3>Weekly Total Traffic</h3>
+                    <div class="chart-wrapper"><canvas id="weekly-total-chart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Row 2: Third-Party Platforms + Websites -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Third-Party Platforms (30d)</h3>
+                    <div class="chart-wrapper"><canvas id="third-party-chart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <h3>Websites (30d)</h3>
+                    <div class="chart-wrapper"><canvas id="websites-chart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Row 3: Weekly by Category -->
+            <div class="charts-grid">
+                <div class="chart-card full-width">
+                    <h3>Weekly Trends by Category</h3>
+                    <div class="chart-wrapper"><canvas id="weekly-category-chart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Top Properties Table -->
+            <!-- Insight Cards -->
+            <div id="overview-insights" class="insights-row"></div>
+
+            <div class="table-card">
+                <h3 class="section-title">Top Properties</h3>
+                <table id="properties-table">
+                    <thead>
+                        <tr>
+                            <th data-sort="name">Property</th>
+                            <th data-sort="brand">Brand</th>
+                            <th data-sort="csm">CSM</th>
+                            <th data-sort="arr">ARR</th>
+                            <th data-sort="views">Pageviews</th>
+                            <th data-sort="top_channel">Top Channel</th>
+                        </tr>
+                    </thead>
+                    <tbody id="properties-body"></tbody>
+                </table>
+            </div>
+
+            <!-- Notable This Period (merged from Signals) -->
+            <div class="collapsible-section" style="margin-top: 2rem;">
+                <div class="signals-section-title collapsible-toggle" onclick="toggleSection(this)">
+                    <h3 style="color: var(--accent-orange);">Notable This Period <span class="collapse-arrow">▾</span></h3>
+                    <span class="count-badge" id="notable-count" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-orange);"></span>
+                </div>
+                <div class="collapsible-body">
+                    <div id="notable-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ WHAT TO EXPECT TAB ============ -->
+        <div class="tab-content" id="tab-seasonal">
+            <!-- Current vs Expected -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="label" id="seasonal-month-label">This Month</div>
+                    <div class="value" id="seasonal-actual">-</div>
+                    <div class="change" id="seasonal-actual-label">actual views</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Expected (Seasonal Avg)</div>
+                    <div class="value" id="seasonal-expected">-</div>
+                    <div class="change" id="seasonal-baseline">based on 2024-2025</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">% of Expected</div>
+                    <div class="value" id="seasonal-pct">-</div>
+                    <div class="change" id="seasonal-pct-label"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Seasonal Peak</div>
+                    <div class="value" style="font-size: 1.1rem;">January</div>
+                    <div class="change">132% of annual average</div>
+                </div>
+            </div>
+
+            <!-- Seasonal Index Chart -->
+            <div class="charts-grid" style="grid-template-columns: 1fr;">
+                <div class="chart-card">
+                    <div class="chart-title">Monthly Seasonal Index</div>
+                    <div class="chart-subtitle">Average traffic pattern across 2024-2025. 100% = annual average.</div>
+                    <div class="chart-container" style="height: 280px;">
+                        <canvas id="seasonal-index-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly History Chart -->
+            <div class="charts-grid" style="grid-template-columns: 1fr; margin-top: 1.5rem;">
+                <div class="chart-card">
+                    <div class="chart-title">Monthly Views by Year</div>
+                    <div class="chart-subtitle">Year-over-year overlay. Each line is one calendar year.</div>
+                    <div class="chart-container" style="height: 320px;">
+                        <canvas id="seasonal-history-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- YoY Table -->
+            <div class="signals-section-title" style="margin-top: 2rem;">
+                <h3 style="color: var(--accent-blue);">Year-over-Year</h3>
+            </div>
+            <div id="seasonal-yoy-table"></div>
+
+            <!-- Context Note -->
+            <div style="margin-top: 1.5rem; padding: 1rem 1.25rem; background: rgba(99, 102, 241, 0.06); border: 1px solid rgba(99, 102, 241, 0.15); border-radius: 10px; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">
+                <strong style="color: var(--text-primary);">Reading the YoY trend:</strong>
+                The 2025-2026 decline is amplified by the VMP migration (truetour.app → visitingmedia.com/app) and the platform redesign rollout. Both changed page structures, tracking domains, and user navigation patterns. The seasonal shape (Jan peak, Dec trough) is consistent and reliable. The absolute volume comparison across years should be read with caution — revenue growth and the decline in pageviews are not contradictory when the measurement changed.
+            </div>
+        </div>
+
+        <!-- ============ DISTRIBUTION CHANNELS TAB ============ -->
+        <div class="tab-content" id="tab-channels">
+            <!-- Channel Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="label">Channels</div>
+                    <div class="value" id="ch-channels-count">-</div>
+                    <div class="change" id="ch-channels-views"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Referrers</div>
+                    <div class="value" id="ch-referrers-count">-</div>
+                    <div class="change" id="ch-referrers-views"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Brand Websites</div>
+                    <div class="value" id="ch-bw-count">-</div>
+                    <div class="change" id="ch-bw-views"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Channels Growing</div>
+                    <div class="value" id="ch-growing" style="color: var(--accent-green)">-</div>
+                    <div class="change" id="ch-growing-detail"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Channels Declining</div>
+                    <div class="value" id="ch-declining" style="color: var(--accent-red)">-</div>
+                    <div class="change" id="ch-declining-detail"></div>
+                </div>
+            </div>
+
+            <!-- Channels (intentional activations) -->
+            <div class="collapsible-section">
+                <div class="signals-section-title collapsible-toggle" onclick="toggleSection(this)">
+                    <h3 style="color: var(--accent-cyan);">Channels <span class="collapse-arrow">▾</span></h3>
+                    <span class="count-badge" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); font-size: 0.65rem;">intentional activations</span>
+                </div>
+                <div class="collapsible-body">
+                    <div class="ch-header">
+                        <span>Channel</span>
+                        <span>Volume (30d)</span>
+                        <span>Properties</span>
+                        <span>12-Week Trend</span>
+                        <span>Change</span>
+                    </div>
+                    <div id="ch-channels-list"></div>
+                </div>
+            </div>
+
+            <!-- Referrers (organic traffic) -->
+            <div class="collapsible-section" style="margin-top: 2rem;">
+                <div class="signals-section-title collapsible-toggle" onclick="toggleSection(this)">
+                    <h3 style="color: var(--accent-orange);">Referrers <span class="collapse-arrow">▾</span></h3>
+                    <span class="count-badge" style="background: rgba(234, 179, 8, 0.15); color: var(--accent-orange); font-size: 0.65rem;">organic traffic</span>
+                </div>
+                <div class="collapsible-body">
+                    <div class="ch-header">
+                        <span>Source</span>
+                        <span>Volume (30d)</span>
+                        <span>Properties</span>
+                        <span>12-Week Trend</span>
+                        <span>Change</span>
+                    </div>
+                    <div id="ch-referrers-list"></div>
+                </div>
+            </div>
+
+            <!-- Brand Websites -->
+            <div class="collapsible-section" style="margin-top: 2rem;">
+                <div class="signals-section-title collapsible-toggle" onclick="toggleSection(this)">
+                    <h3 style="color: var(--accent-green);">Brand Websites <span class="collapse-arrow">▾</span></h3>
+                </div>
+                <div class="collapsible-body">
+                    <div class="ch-header">
+                        <span>Channel</span>
+                        <span>Volume (30d)</span>
+                        <span>Properties</span>
+                        <span>12-Week Trend</span>
+                        <span>Change</span>
+                    </div>
+                    <div id="ch-bw-list"></div>
+                </div>
+            </div>
+
+            <!-- Brand Portfolio Rollup -->
+            <div class="collapsible-section" style="margin-top: 2rem;">
+                <div class="signals-section-title collapsible-toggle" onclick="toggleSection(this)">
+                    <h3 style="color: var(--accent-orange);">Brand Portfolios <span class="collapse-arrow">▾</span></h3>
+                </div>
+                <div class="collapsible-body">
+                    <div class="ch-header brand-header">
+                        <span>Brand</span>
+                        <span>Volume (30d)</span>
+                        <span>Properties</span>
+                        <span>Total ARR</span>
+                        <span>Change</span>
+                    </div>
+                    <div id="ch-brand-list"></div>
+                </div>
+            </div>
+
+            <!-- Search & AI -->
+            <div class="collapsible-section" style="margin-top: 2rem;">
+                <div class="signals-section-title collapsible-toggle" onclick="toggleSection(this)">
+                    <h3 style="color: var(--accent-purple);">Search & AI <span class="collapse-arrow">▾</span></h3>
+                </div>
+                <div class="collapsible-body">
+                    <div class="ch-header">
+                        <span>Channel</span>
+                        <span>Volume (30d)</span>
+                        <span>Properties</span>
+                        <span>12-Week Trend</span>
+                        <span>Change</span>
+                    </div>
+                    <div id="ch-search-list"></div>
+                </div>
+            </div>
+
+            <!-- AI Spotlight -->
+            <div id="ai-spotlight-section" class="collapsible-section" style="margin-top: 2rem; display: none;">
+                <div class="signals-section-title collapsible-toggle" onclick="toggleSection(this)">
+                    <h3 style="color: var(--accent-orange);">AI Traffic Spotlight <span class="collapse-arrow">▾</span></h3>
+                </div>
+                <div class="collapsible-body">
+                    <div class="ai-spotlight-card" id="ai-spotlight-content"></div>
+                </div>
+            </div>
+
+            <!-- Coverage Gaps -->
+            <div class="collapsible-section" style="margin-top: 2rem;">
+                <div class="signals-section-title collapsible-toggle" onclick="toggleSection(this)">
+                    <h3 style="color: var(--accent-red);">Single-Channel Properties <span class="collapse-arrow">▾</span></h3>
+                    <span class="count-badge" id="ch-gaps-badge" style="background: rgba(239, 68, 68, 0.15); color: var(--accent-red);"></span>
+                    <span class="export-csv-link" onclick="exportSection('gaps', event)">⬇ Export CSV</span>
+                </div>
+                <div class="collapsible-body">
+                    <div class="cx-header cx-dark-header">
+                        <span>Property</span>
+                        <span>ARR</span>
+                        <span>Only Channel</span>
+                        <span>Views</span>
+                    </div>
+                    <div id="ch-gaps-list" class="scroll-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ CX LEADERSHIP TAB ============ -->
+        <div class="tab-content" id="tab-cx">
+            <!-- CX Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="label">Active Accounts</div>
+                    <div class="value" id="cx-active">-</div>
+                    <div class="change" id="cx-with-traffic"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Dark Properties</div>
+                    <div class="value" id="cx-dark" style="color: var(--accent-orange)">-</div>
+                    <div class="change">No distribution traffic</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Wins</div>
+                    <div class="value" id="cx-wins-count" style="color: var(--accent-green)">-</div>
+                    <div class="change">Active accounts growing</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Opportunities</div>
+                    <div class="value" id="cx-opps-count" style="color: var(--accent-red)">-</div>
+                    <div class="change">Active accounts declining</div>
+                </div>
+            </div>
+
+            <!-- Key Takeaways -->
+            <div id="cx-takeaways" class="cx-takeaways"></div>
+
+            <!-- Score Lookup -->
+            <div class="score-lookup">
+                <div class="score-lookup-input-wrap">
+                    <input type="text" id="score-lookup-input" placeholder="Look up distribution score by property name..." autocomplete="off">
+                </div>
+                <div id="score-lookup-result"></div>
+            </div>
+
+            <!-- CSM Portfolios -->
+            <div class="signals-section-title collapsible" onclick="toggleSection(this)">
+                <h3 style="color: var(--accent-blue);">CSM Portfolios</h3>
+                <span class="export-csv-link" onclick="exportSection('csm-portfolios', event)">⬇ Export CSV</span>
+                <span class="collapse-arrow">&#9660;</span>
+            </div>
+            <div class="collapsible-body">
+                <div class="csm-header">
+                    <span>CSM</span>
+                    <span>Portfolio</span>
+                    <span>ARR Growing</span>
+                    <span>ARR at Risk</span>
+                    <span>Health</span>
+                </div>
+                <div id="cx-csm-list" class="scroll-list"></div>
+            </div>
+
+            <!-- Distribution Scores -->
+            <div class="signals-section-title collapsible collapsed" onclick="toggleSection(this)" style="margin-top: 2rem;">
+                <h3 style="color: var(--accent-purple);">Distribution Scores</h3>
+                <span style="font-size: 0.7rem; color: var(--text-muted); margin-left: 8px;">Channel diversity + traffic + breadth (1-100)</span>
+                <span class="export-csv-link" onclick="exportSection('scores', event)">⬇ Export CSV</span>
+                <span class="collapse-arrow">&#9660;</span>
+            </div>
+            <div class="collapsible-body" style="display:none;">
+                <div class="score-header">
+                    <span>Score</span>
+                    <span>Property</span>
+                    <span>Channels</span>
+                    <span>Views</span>
+                    <span>ARR</span>
+                </div>
+                <div id="cx-scores-list" class="scroll-list"></div>
+            </div>
+
+            <!-- Wins -->
+            <div class="signals-section-title collapsible" onclick="toggleSection(this)" style="margin-top: 2rem;">
+                <h3 style="color: var(--accent-green);">Wins</h3>
+                <span class="count-badge" id="cx-wins-badge" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green);"></span>
+                <span class="export-csv-link" onclick="exportSection('wins', event)">⬇ Export CSV</span>
+                <span class="collapse-arrow">&#9660;</span>
+            </div>
+            <div class="collapsible-body">
+                <div class="cx-header">
+                    <span>Property</span>
+                    <span>ARR</span>
+                    <span>CSM</span>
+                    <span>Change</span>
+                    <span>Top Driver</span>
+                </div>
+                <div id="cx-wins-list" class="scroll-list"></div>
+            </div>
+
+            <!-- Opportunities -->
+            <div class="signals-section-title collapsible collapsed" onclick="toggleSection(this)" style="margin-top: 2rem;">
+                <h3 style="color: var(--accent-red);">Opportunities</h3>
+                <span class="count-badge" id="cx-opps-badge" style="background: rgba(239, 68, 68, 0.15); color: var(--accent-red);"></span>
+                <span class="export-csv-link" onclick="exportSection('opps', event)">⬇ Export CSV</span>
+                <span class="collapse-arrow">&#9660;</span>
+            </div>
+            <div class="collapsible-body" style="display:none;">
+                <div class="cx-header">
+                    <span>Property</span>
+                    <span>ARR</span>
+                    <span>CSM</span>
+                    <span>Change</span>
+                    <span>Biggest Drop</span>
+                </div>
+                <div id="cx-opps-list" class="scroll-list"></div>
+            </div>
+
+            <!-- Dark Properties -->
+            <div class="signals-section-title collapsible collapsed" onclick="toggleSection(this)" style="margin-top: 2rem;">
+                <h3 style="color: var(--accent-orange);">Dark Properties</h3>
+                <span class="count-badge" id="cx-dark-badge" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-orange);"></span>
+                <span class="export-csv-link" onclick="exportSection('dark', event)">⬇ Export CSV</span>
+                <span class="collapse-arrow">&#9660;</span>
+            </div>
+            <div class="collapsible-body" style="display:none;">
+                <div class="cx-header cx-dark-header">
+                    <span>Property</span>
+                    <span>ARR</span>
+                    <span>CSM</span>
+                    <span>Brand</span>
+                </div>
+                <div id="cx-dark-list" class="scroll-list"></div>
+            </div>
+        </div>
+
+        <!-- ============ LEGACY SUNSET TAB ============ -->
+        <div class="tab-content" id="tab-tt8sunset">
+
+            <!-- Top stats row -->
+            <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom:2rem;">
+                <div class="stat-card">
+                    <div class="label">MTD Pageviews</div>
+                    <div class="value" id="tt8-mtd-views" style="font-family:'JetBrains Mono',monospace;">—</div>
+                    <div class="change" id="tt8-mtd-dates" style="color:var(--text-muted);font-size:0.75rem;"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="label" id="tt8-prior-label">vs Last Month</div>
+                    <div class="value" id="tt8-prior-delta">—</div>
+                    <div class="change" id="tt8-prior-pct"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Time to Zero</div>
+                    <div class="value" id="tt8-days-to-zero" style="color:var(--accent-green);">—</div>
+                    <div class="change" id="tt8-zero-date" style="font-size:0.8rem;"></div>
+                </div>
+            </div>
+
+            <!-- Gauge -->
+            <div class="card" style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:2rem;margin-bottom:2rem;text-align:center;">
+                <div style="font-size:0.8rem;font-weight:600;letter-spacing:0.08em;color:var(--text-muted);text-transform:uppercase;margin-bottom:1.25rem;">Legacy Traffic Gauge — Projected Month vs Peak</div>
+                <div style="position:relative;display:inline-block;width:320px;height:175px;">
+                    <canvas id="tt8-gauge" width="320" height="175"></canvas>
+                    <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);text-align:center;">
+                        <div id="tt8-gauge-value" style="font-size:2rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text-primary);">—</div>
+                        <div id="tt8-gauge-subtitle" style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">pageviews this month</div>
+                        <div id="tt8-gauge-decline" style="font-size:0.8rem;color:var(--accent-green);margin-top:4px;font-weight:600;"></div>
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:space-between;max-width:320px;margin:0.5rem auto 0;font-size:0.7rem;color:var(--text-muted);">
+                    <span style="color:var(--accent-green);">0 (goal)</span>
+                    <span id="tt8-gauge-max-label" style="color:var(--accent-red);">peak</span>
+                </div>
+            </div>
+
+            <!-- 90-day trend -->
+            <div class="card" style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:2rem;">
+                <div style="font-size:0.8rem;font-weight:600;letter-spacing:0.08em;color:var(--text-muted);text-transform:uppercase;margin-bottom:1rem;">90-Day Daily Pageviews</div>
+                <div style="position:relative;height:200px;">
+                    <canvas id="tt8-trend-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Top 5 remaining properties -->
+            <div class="card" style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:2rem;">
+                <div style="font-size:0.8rem;font-weight:600;letter-spacing:0.08em;color:var(--text-muted);text-transform:uppercase;margin-bottom:1rem;">Top 5 Remaining tt8 Properties <span style="font-size:0.7rem;font-weight:400;">(this month — focus retirement here)</span></div>
+                <div id="tt8-top-slugs">
+                    <div class="loading" style="color:var(--text-muted);padding:1rem;">Loading...</div>
+                </div>
+            </div>
+
+        </div>
+
+        <footer>
+            Distribution Analytics &mdash; Visiting Media
+        </footer>
+    </div>
+
+    <script>
+    const CAT_COLORS = {
+        'platform': '#6366f1',
+        'third_party': '#22d3ee',
+        'websites': '#10b981',
+        'brand_website': '#10b981',
+        'property_website': '#f59e0b',
+        'search': '#a855f7',
+        'social': '#ec4899',
+        'ai': '#f97316',
+        'direct': '#64748b',
+        'unknown': '#475569',
+    };
+
+    const CAT_LABELS = {
+        'platform': 'VM Platform',
+        'third_party': 'Third-Party',
+        'websites': 'Websites',
+        'brand_website': 'Brand Website',
+        'property_website': 'Property Website',
+        'search': 'Search',
+        'social': 'Social',
+        'ai': 'AI',
+        'direct': 'Direct',
+        'unknown': 'Unknown',
+    };
+
+    const BAR_COLORS = [
+        '#6366f1', '#22d3ee', '#10b981', '#f59e0b', '#ef4444',
+        '#a855f7', '#ec4899', '#8b5cf6', '#14b8a6', '#f97316',
+        '#06b6d4', '#84cc16', '#e11d48', '#7c3aed', '#0ea5e9',
+    ];
+
+    let charts = {};
+    let sortCol = 'views';
+    let sortDir = -1;
+    let dashboardData = null;
+    // currentFilter removed — Signals tab merged into Overview
+
+    // ============ TAB SWITCHING ============
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    // ============ SCORE LOOKUP ============
+    document.getElementById('score-lookup-input').addEventListener('input', function() {
+        const query = this.value.trim().toLowerCase();
+        const resultEl = document.getElementById('score-lookup-result');
+        if (!query || query.length < 2 || !dashboardData) {
+            resultEl.innerHTML = '';
+            return;
+        }
+
+        const scores = dashboardData.distribution_scores || [];
+        const matches = scores.filter(s =>
+            s.name.toLowerCase().includes(query) ||
+            (s.brand && s.brand.toLowerCase().includes(query))
+        ).slice(0, 3);
+
+        if (!matches.length) {
+            resultEl.innerHTML = `<div style="padding:0.75rem;color:var(--text-muted);font-size:0.85rem;">No matches for "${this.value}"</div>`;
+            return;
+        }
+
+        resultEl.innerHTML = matches.map(s => {
+            const tier = s.score >= 75 ? 'high' : s.score >= 40 ? 'mid' : 'low';
+            const tierLabel = s.score >= 75 ? 'Well distributed' : s.score >= 40 ? 'Moderate' : 'Under-distributed';
+
+            // Channels they're on
+            const noiseChannels = ['Direct', 'Not Set', '(direct)', '(none)', '(not set)'];
+            const channelsOn = (s.channels_on || []).filter(c => !noiseChannels.includes(c)).slice(0, 5).map(c =>
+                `<span style="display:inline-block;padding:2px 8px;margin:2px;border-radius:6px;background:rgba(16,185,129,0.1);color:var(--accent-green);font-size:0.7rem;">${c}</span>`
+            ).join('');
+
+            // Categories missing
+            const catMissing = (s.categories_missing || []).map(c =>
+                `<span style="display:inline-block;padding:2px 8px;margin:2px;border-radius:6px;background:rgba(239,68,68,0.1);color:var(--accent-red);font-size:0.7rem;">${c.replace('_', ' ')}</span>`
+            ).join('');
+
+            // Brand peer comparison
+            const brandCtx = s.brand_avg != null ? `<span style="font-size:0.75rem;color:var(--text-muted);">Brand avg: ${s.brand_avg} (${s.vs_brand >= 0 ? '+' : ''}${s.vs_brand})</span>` : '';
+
+            return `
+                <div class="score-result-card">
+                    <div>
+                        <div class="score-big ${tier}">${s.score}</div>
+                    </div>
+                    <div class="score-result-details">
+                        <h4>${s.name}</h4>
+                        <div class="meta">${s.brand || ''} ${s.csm ? '· CSM: ' + s.csm : ''} ${s.arr ? '· ' + fmtArr(s.arr) + ' ARR' : ''} ${brandCtx}</div>
+                        <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.5rem;">${tierLabel} — ${s.category_count} channel types, ${s.channel_count} channels, ${fmt(s.views)} views</div>
+                        <div style="margin-bottom:0.5rem;">
+                            <div class="factor-label" style="margin-bottom:4px;">Distributed on</div>
+                            ${channelsOn || '<span style="font-size:0.75rem;color:var(--text-muted);">None</span>'}
+                        </div>
+                        ${catMissing ? `<div style="margin-bottom:0.5rem;">
+                            <div class="factor-label" style="margin-bottom:4px;">Missing</div>
+                            ${catMissing}
+                        </div>` : ''}
+                        <div style="margin-top:0.5rem;padding:0.5rem 0.75rem;background:rgba(99,102,241,0.06);border-radius:8px;font-size:0.8rem;color:var(--accent-cyan);">
+                            → ${s.next_step || 'Well distributed'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    });
+
+    // ============ COLLAPSIBLE SECTIONS ============
+    function toggleSection(titleEl) {
+        const body = titleEl.nextElementSibling;
+        const isCollapsed = titleEl.classList.contains('collapsed');
+        if (isCollapsed) {
+            titleEl.classList.remove('collapsed');
+            body.style.display = '';
+            body.classList.remove('collapsed');
+        } else {
+            titleEl.classList.add('collapsed');
+            body.classList.add('collapsed');
+            setTimeout(() => { if (titleEl.classList.contains('collapsed')) body.style.display = 'none'; }, 250);
+        }
+    }
+
+    // ============ MAIN LOAD ============
+    async function loadDashboard() {
+        try {
+            const res = await fetch('/analytics/api/data');
+            dashboardData = await res.json();
+            if (dashboardData.error) {
+                document.getElementById('last-updated').textContent = dashboardData.error;
+                return;
+            }
+
+            // Core renderers
+            renderStats(dashboardData);
+            renderPlatformSplit(dashboardData.platform_breakdown || {});
+            renderAlerts(dashboardData.alerts || []);
+            renderCategoryChart(dashboardData.categories || {});
+            renderWeeklyTotal(dashboardData.weekly || {});
+            renderThirdPartyChart(dashboardData.third_party || []);
+            renderWebsitesChart(dashboardData.brand_websites || [], dashboardData.property_websites || []);
+            renderWeeklyCategoryChart(dashboardData.weekly || {});
+            renderProperties(dashboardData.top_properties || []);
+            renderNotable(dashboardData);
+            // New tabs — isolated so one failure doesn't kill the dashboard
+            try { renderOverviewInsights(dashboardData); } catch(e) { console.error('Insights error:', e); }
+            try { renderSeasonality(dashboardData); } catch(e) { console.error('Seasonality tab error:', e); }
+            try { renderDistributionChannels(dashboardData); } catch(e) { console.error('Distribution tab error:', e); }
+            try { renderCxSignals(dashboardData); } catch(e) { console.error('CX tab error:', e); }
+
+            const d = new Date(dashboardData.generated_at);
+            const ago = timeAgo(d);
+            document.getElementById('last-updated').textContent =
+                `Updated ${ago}  \u2014  ${dashboardData.period.start} to ${dashboardData.period.end}`;
+
+            // Tab badge counts
+            const cx = dashboardData.cx_signals || {};
+            const cxCount = (cx.wins || []).length + (cx.opportunities || []).length;
+            if (cxCount) document.getElementById('cx-badge').textContent = cxCount;
+            const chCount = (dashboardData.brand_websites || []).length + (dashboardData.third_party || []).length;
+            if (chCount) document.getElementById('channels-badge').textContent = chCount;
+        } catch (e) {
+            document.getElementById('last-updated').textContent = 'Failed to load data';
+            console.error(e);
+        }
+    }
+
+    function fmt(n) { return n.toLocaleString(); }
+
+    function timeAgo(date) {
+        const seconds = Math.floor((new Date() - date) / 1000);
+        if (seconds < 60) return 'just now';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        return `${days}d ago`;
+    }
+
+    // ============ NOTABLE THIS PERIOD (merged from Signals) ============
+    function renderNotable(data) {
+        const alerts = data.alerts || [];
+        // Filter to only new channels and big surges (>100%)
+        const notable = alerts.filter(a =>
+            a.type === 'new_channel' ||
+            (a.type === 'surge' && (a.pct_change || 0) >= 100)
+        ).slice(0, 5);
+
+        const el = document.getElementById('notable-list');
+        const badge = document.getElementById('notable-count');
+        if (!notable.length) {
+            el.innerHTML = '<div class="loading">Nothing notable this period</div>';
+            badge.textContent = '0';
+            return;
+        }
+        badge.textContent = notable.length;
+        el.innerHTML = notable.map(a => {
+            const isNew = a.type === 'new_channel';
+            const emoji = isNew ? '🆕' : '📈';
+            const color = isNew ? 'var(--accent-cyan)' : 'var(--accent-green)';
+            const detail = isNew
+                ? `${a.channel} appeared with ${fmt(a.views)} views`
+                : `${a.channel} up ${a.pct_change}% (${fmt(a.views_current)} views)`;
+            return `<div class="signal-card" style="border-left: 3px solid ${color}; padding: 0.75rem 1rem; margin-bottom: 0.5rem;">
+                <span>${emoji} <strong>${a.channel}</strong> — ${detail}</span>
+                <span class="cat-tag" style="margin-left: 0.5rem; font-size: 0.65rem; opacity: 0.6;">${a.category}</span>
+            </div>`;
+        }).join('');
+    }
+
+    function drawSparkline(canvas, weeklyData, isDown) {
+        if (!weeklyData || !weeklyData.length) return;
+
+        // Tooltip with week-by-week values
+        const tooltipData = weeklyData.map(d => `W${d.week.slice(-2)}: ${fmt(d.views)}`).join(' → ');
+        canvas.title = tooltipData;
+
+        const trimmed = weeklyData.length > 2 ? weeklyData.slice(1, -1) : weeklyData;
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width = 110;
+        const h = canvas.height = 32;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.scale(dpr, dpr);
+
+        const values = trimmed.map(d => d.views);
+        const max = Math.max(...values, 1);
+        const min = Math.min(...values, 0);
+        const range = max - min || 1;
+        const pad = 3;
+
+        const color = isDown ? '#ef4444' : '#10b981';
+        const fillColor = isDown ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)';
+
+        // Fill
+        ctx.beginPath();
+        values.forEach((v, i) => {
+            const x = pad + (i / (values.length - 1)) * (w - pad * 2);
+            const y = pad + (1 - (v - min) / range) * (h - pad * 2);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.lineTo(pad + (w - pad * 2), h - pad);
+        ctx.lineTo(pad, h - pad);
+        ctx.closePath();
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+
+        // Line
+        ctx.beginPath();
+        values.forEach((v, i) => {
+            const x = pad + (i / (values.length - 1)) * (w - pad * 2);
+            const y = pad + (1 - (v - min) / range) * (h - pad * 2);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.8;
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+
+        // End dot
+        const lastX = pad + (w - pad * 2);
+        const lastY = pad + (1 - (values[values.length - 1] - min) / range) * (h - pad * 2);
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    // ============ OVERVIEW INSIGHT CARDS ============
+    function switchToTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        const btn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+        if (btn) btn.classList.add('active');
+        const tab = document.getElementById('tab-' + tabName);
+        if (tab) tab.classList.add('active');
+    }
+
+    function renderOverviewInsights(data) {
+        const cx = data.cx_signals || {};
+        const dark = data.dark_properties || [];
+        const gaps = data.coverage_gaps || [];
+        const portfolios = data.csm_portfolios || [];
+
+        const totalAtRisk = portfolios.reduce((s, p) => s + (p.arr_at_risk || 0), 0);
+        const totalGrowing = portfolios.reduce((s, p) => s + (p.arr_growing || 0), 0);
+
+        const cards = [];
+
+        if (cx.wins && cx.opportunities) {
+            cards.push({
+                icon: '📊',
+                stat: `${cx.wins.length} wins · ${cx.opportunities.length} opps`,
+                label: `${fmtArr(totalGrowing)} growing · ${fmtArr(totalAtRisk)} at risk`,
+                link: 'View CSM portfolios →',
+                tab: 'cx',
+            });
+        }
+
+        if (gaps.length) {
+            cards.push({
+                icon: '⚠️',
+                stat: `${gaps.length} single-channel`,
+                label: 'Properties with one distribution source',
+                link: 'View coverage gaps →',
+                tab: 'channels',
+            });
+        }
+
+        if (dark.length) {
+            cards.push({
+                icon: '🌑',
+                stat: `${dark.length} dark properties`,
+                label: `${fmtArr(dark.reduce((s, d) => s + (d.arr || 0), 0))} ARR with zero traffic`,
+                link: 'View dark properties →',
+                tab: 'cx',
+            });
+        }
+
+        document.getElementById('overview-insights').innerHTML = cards.map(c => `
+            <div class="insight-card" onclick="switchToTab('${c.tab}')">
+                <div class="insight-icon">${c.icon}</div>
+                <div class="insight-stat">${c.stat}</div>
+                <div class="insight-label">${c.label}</div>
+                <div class="insight-link">${c.link}</div>
+            </div>
+        `).join('');
+    }
+
+    // ============ WHAT TO EXPECT TAB ============
+    function renderSeasonality(data) {
+        const s = data.seasonality;
+        if (!s) return;
+
+        const cve = s.current_vs_expected || {};
+        document.getElementById('seasonal-month-label').textContent = cve.month || 'This Month';
+        document.getElementById('seasonal-actual').textContent = fmt(cve.actual || 0);
+        document.getElementById('seasonal-expected').textContent = fmt(cve.expected || 0);
+
+        const pct = cve.pct_of_expected || 0;
+        const pctEl = document.getElementById('seasonal-pct');
+        pctEl.textContent = pct + '%';
+        pctEl.style.color = pct >= 90 ? 'var(--accent-green)' : pct >= 70 ? 'var(--accent-orange)' : 'var(--accent-red)';
+        document.getElementById('seasonal-pct-label').textContent =
+            pct >= 100 ? 'above seasonal norm' : pct >= 90 ? 'near seasonal norm' : 'below seasonal norm';
+
+        // Seasonal Index Bar Chart
+        const idx = s.seasonal_index || {};
+        const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const indexValues = monthNames.map(m => (idx[m] || {}).index || 100);
+        const indexColors = indexValues.map(v =>
+            v >= 120 ? '#10b981' : v >= 100 ? '#22d3ee' : v >= 80 ? '#f59e0b' : '#ef4444'
+        );
+
+        if (charts['seasonal-index']) charts['seasonal-index'].destroy();
+        charts['seasonal-index'] = new Chart(document.getElementById('seasonal-index-chart'), {
+            type: 'bar',
+            data: {
+                labels: monthNames,
+                datasets: [{
+                    data: indexValues,
+                    backgroundColor: indexColors,
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => {
+                                const m = monthNames[ctx.dataIndex];
+                                const avg = (idx[m] || {}).avg_views || 0;
+                                return `${ctx.raw}% of avg (${fmt(avg)} views)`;
+                            }
+                        }
+                    },
+                    annotation: {
+                        annotations: {
+                            baseline: {
+                                type: 'line', yMin: 100, yMax: 100,
+                                borderColor: 'rgba(255,255,255,0.3)', borderDash: [4, 4], borderWidth: 1,
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#9090a8', callback: v => v + '%' },
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#9090a8' },
+                    }
+                }
+            }
+        });
+
+        // Monthly History Chart — overlay each year as a separate line
+        const history = s.history || [];
+        const yearGroups = {};
+        for (const h of history) {
+            // Skip pre-ramp
+            if (h.year < 2023 || (h.year === 2023 && h.month < 7)) continue;
+            if (!yearGroups[h.year]) yearGroups[h.year] = new Array(12).fill(null);
+            yearGroups[h.year][h.month - 1] = h.views;
+        }
+
+        const yearColors = {
+            2023: { border: 'rgba(100,116,139,0.6)', bg: 'rgba(100,116,139,0.05)' },
+            2024: { border: '#6366f1', bg: 'rgba(99,102,241,0.05)' },
+            2025: { border: '#22d3ee', bg: 'rgba(34,211,238,0.05)' },
+            2026: { border: '#10b981', bg: 'rgba(16,185,129,0.05)' },
+        };
+
+        const datasets = Object.keys(yearGroups).sort().map(year => ({
+            label: year,
+            data: yearGroups[year],
+            borderColor: (yearColors[year] || yearColors[2024]).border,
+            backgroundColor: (yearColors[year] || yearColors[2024]).bg,
+            tension: 0.3,
+            pointRadius: 3,
+            borderWidth: year == new Date().getFullYear() ? 3 : 2,
+            spanGaps: false,
+        }));
+
+        if (charts['seasonal-history']) charts['seasonal-history'].destroy();
+        charts['seasonal-history'] = new Chart(document.getElementById('seasonal-history-chart'), {
+            type: 'line',
+            data: { labels: monthNames, datasets },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#9090a8', usePointStyle: true, padding: 20 },
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => `${ctx.dataset.label}: ${ctx.raw ? fmt(ctx.raw) : 'N/A'} views`,
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#9090a8', callback: v => (v / 1000000).toFixed(1) + 'M' },
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#9090a8' },
+                    }
+                }
+            }
+        });
+
+        // YoY Table
+        const yoy = s.yoy || [];
+        document.getElementById('seasonal-yoy-table').innerHTML = yoy.map((y, i) => {
+            const prevAvg = i > 0 ? yoy[i-1].avg_monthly : null;
+            const yoyPct = prevAvg ? round(((y.avg_monthly - prevAvg) / prevAvg) * 100, 1) : null;
+            const yoyColor = yoyPct === null ? '' : yoyPct >= 0 ? 'color:var(--accent-green)' : 'color:var(--accent-red)';
+            const yoyLabel = yoyPct === null ? '—' : (yoyPct >= 0 ? '+' : '') + yoyPct + '%';
+            const isPartial = y.months < 12;
+            return `
+                <div class="cx-card" style="grid-template-columns: 0.5fr 1.5fr 1fr 1fr 1fr; border-left: 3px solid ${y.year >= 2026 ? 'var(--accent-green)' : y.year >= 2025 ? 'var(--accent-cyan)' : 'var(--accent-blue)'};">
+                    <div style="font-weight:700;font-size:1rem;">${y.year}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;">${fmt(y.total)} views${isPartial ? ' (' + y.months + ' mo)' : ''}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;">${fmt(y.avg_monthly)}/mo</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;${yoyColor}">${yoyLabel}</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);">${y.months} months</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function round(n, d) { return Math.round(n * Math.pow(10, d)) / Math.pow(10, d); }
+
+    // ============ DISTRIBUTION CHANNELS TAB ============
+    function renderChannelCard(c, prefix, i) {
+        const isDown = c.pct_change < 0;
+        const isNew = c.views_previous === 0 && c.views > 0;
+        const trendClass = isNew ? 'trend-new' : c.trend === 'up' ? 'trend-up' : c.trend === 'down' ? 'trend-down' : 'trend-stable';
+        const pctColor = isDown ? 'var(--accent-red)' : c.pct_change > 0 ? 'var(--accent-green)' : 'var(--text-secondary)';
+        const pctSign = c.pct_change > 0 ? '+' : '';
+        const diff = c.views - c.views_previous;
+        const diffSign = diff >= 0 ? '+' : '';
+        const newBadge = isNew ? ' <span style="font-size:0.65rem;padding:2px 6px;border-radius:8px;background:rgba(34,211,238,0.15);color:var(--accent-cyan);font-weight:700;">NEW</span>' : '';
+
+        return `
+            <div class="ch-card ${trendClass}">
+                <div>
+                    <span class="ch-name">${c.name}${newBadge}</span>
+                </div>
+                <div>
+                    <div class="ch-volume">${fmt(c.views)}</div>
+                    <div class="ch-prev">was ${fmt(c.views_previous)}</div>
+                </div>
+                <div class="ch-props">${c.property_count}</div>
+                <div style="text-align:center;">
+                    <canvas id="spark-${prefix}-${i}" width="110" height="32"></canvas>
+                </div>
+                <div class="ch-change">
+                    <div class="ch-pct" style="color:${pctColor}">${pctSign}${c.pct_change}%</div>
+                    <div class="ch-diff">${diffSign}${fmt(diff)} views</div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Unified toggleSection — handles both old .collapsible-section wrapper
+    // layout AND new .collapsible title + sibling .collapsible-body layout.
+    // (Previously two same-named definitions; second shadowed first, so the
+    // CX Leadership sections' arrows did nothing — Jenny's bug, 2026-05-18.)
+    function toggleSection(el) {
+        const section = el.closest('.collapsible-section');
+        if (section) {
+            const wasCollapsed = section.classList.contains('collapsed');
+            section.classList.toggle('collapsed');
+            if (wasCollapsed) scrollSectionIntoView(el);
+            return;
+        }
+        const body = el.nextElementSibling;
+        if (!body) return;
+        const isCollapsed = el.classList.contains('collapsed');
+        if (isCollapsed) {
+            el.classList.remove('collapsed');
+            body.style.display = '';
+            body.classList.remove('collapsed');
+            scrollSectionIntoView(el);
+        } else {
+            el.classList.add('collapsed');
+            body.classList.add('collapsed');
+            setTimeout(() => { if (el.classList.contains('collapsed')) body.style.display = 'none'; }, 400);
+        }
+    }
+
+    // After expanding a section, pull its title to the top of the viewport so the
+    // newly-revealed list is what the user actually sees. Without this, opening
+    // Dark Properties (3800px tall) appears to "do nothing" because the content
+    // expands off-screen below the click point.
+    // CSM card expand/collapse — toggles its detail panel and keeps the clicked card
+    // anchored near the top of the viewport so its (now-expanded) detail is visible
+    // even when prior CSMs are already open above it.
+    function toggleCsmDetail(cardEl, idx) {
+        const panel = document.getElementById('csm-detail-' + idx);
+        if (!panel) return;
+        const willOpen = panel.style.display === 'none';
+        panel.style.display = willOpen ? '' : 'none';
+        if (willOpen) {
+            setTimeout(() => {
+                const rect = cardEl.getBoundingClientRect();
+                if (rect.top < 80 || rect.top > window.innerHeight - 200) {
+                    const target = window.scrollY + rect.top - 80;
+                    window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+                }
+            }, 30);
+        }
+    }
+
+    function scrollSectionIntoView(titleEl) {
+        // Defer until the expand transition is mostly complete so the layout has settled.
+        setTimeout(() => {
+            const rect = titleEl.getBoundingClientRect();
+            const target = window.scrollY + rect.top - 80;  // 80px breathing room for sticky header
+            window.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+        }, 60);
+    }
+
+    // CSV export helper. Pass rows as array of objects; headers as array of
+    // [label, key|fn] tuples. Strings get quote-escaped per RFC 4180.
+    function downloadCSV(filename, rows, headers) {
+        const esc = v => {
+            if (v === null || v === undefined) return '';
+            const s = String(v);
+            return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+        };
+        const headerRow = headers.map(h => esc(h[0])).join(',');
+        const dataRows = rows.map(r => headers.map(h => {
+            const v = typeof h[1] === 'function' ? h[1](r) : r[h[1]];
+            return esc(v);
+        }).join(','));
+        const csv = [headerRow, ...dataRows].join('\r\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function exportSection(kind, ev) {
+        if (ev) ev.stopPropagation();
+        if (!dashboardData) return;
+        const d = dashboardData;
+        const today = new Date().toISOString().slice(0, 10);
+        const period = (d.totals && d.totals.period) ? `_${d.totals.period.replace(/[^0-9-]/g, '').replace(/^-|-$/g, '')}` : '';
+        const sources = {
+            'csm-portfolios': d.csm_portfolios || [],
+            'wins': (d.cx && d.cx.wins) || [],
+            'opps': (d.cx && d.cx.opportunities) || [],
+            'dark': d.dark_properties || [],
+            'scores': d.distribution_scores || [],
+            'gaps': d.coverage_gaps || [],
+        };
+        const headers = {
+            'csm-portfolios': [
+                ['CSM', 'csm'],
+                ['Growing', 'wins'],
+                ['Declining', 'opportunities'],
+                ['Stable', r => r.stable || 0],
+                ['Dark', r => r.dark || 0],
+                ['Total Accounts', r => r.total_accounts || 0],
+                ['ARR Growing', 'arr_growing'],
+                ['ARR At Risk', 'arr_at_risk'],
+                ['Health', r => r.health || ''],
+            ],
+            'wins': [
+                ['Property', 'name'],
+                ['Location', 'location'],
+                ['Brand', 'brand'],
+                ['CSM', 'csm'],
+                ['ARR', 'arr'],
+                ['Pct Change', 'pct_change'],
+                ['Top Driver', r => (r.channel_changes && r.channel_changes[0] && r.channel_changes[0].channel) || ''],
+                ['Driver Prev Views', r => (r.channel_changes && r.channel_changes[0] && r.channel_changes[0].views_previous) || 0],
+                ['Driver Curr Views', r => (r.channel_changes && r.channel_changes[0] && r.channel_changes[0].views) || 0],
+            ],
+            'opps': [
+                ['Property', 'name'],
+                ['Location', 'location'],
+                ['Brand', 'brand'],
+                ['CSM', 'csm'],
+                ['ARR', 'arr'],
+                ['Pct Change', 'pct_change'],
+                ['Biggest Drop', r => (r.channel_changes && r.channel_changes[0] && r.channel_changes[0].channel) || ''],
+                ['Drop Prev Views', r => (r.channel_changes && r.channel_changes[0] && r.channel_changes[0].views_previous) || 0],
+                ['Drop Curr Views', r => (r.channel_changes && r.channel_changes[0] && r.channel_changes[0].views) || 0],
+            ],
+            'dark': [
+                ['Property', 'name'],
+                ['Parent', 'parent'],
+                ['Brand', 'brand'],
+                ['CSM', 'csm'],
+                ['ARR', 'arr'],
+            ],
+            'scores': [
+                ['Score', 'score'],
+                ['Property', 'name'],
+                ['Brand', 'brand'],
+                ['Channels', 'channel_count'],
+                ['Views', 'views'],
+                ['ARR', 'arr'],
+            ],
+            'gaps': [
+                ['Property', 'name'],
+                ['Brand', 'brand'],
+                ['ARR', 'arr'],
+                ['Only Channel', 'top_channel'],
+                ['Views', 'views'],
+            ],
+        };
+        const names = {
+            'csm-portfolios': 'csm-portfolios',
+            'wins': 'wins',
+            'opps': 'opportunities',
+            'dark': 'dark-properties',
+            'scores': 'distribution-scores',
+            'gaps': 'single-channel-properties',
+        };
+        downloadCSV(`${names[kind]}-${today}.csv`, sources[kind], headers[kind]);
+    }
+
+    function renderDistributionChannels(data) {
+        const ch = data.channels || [];
+        const ref = data.referrers || [];
+        const bw = data.brand_websites || [];
+        const search = data.search || [];
+        const ai = data.ai || [];
+        const searchAndAi = [...search, ...ai].sort((a, b) => b.views - a.views);
+
+        // Stats
+        const chViews = ch.reduce((s, c) => s + c.views, 0);
+        const refViews = ref.reduce((s, c) => s + c.views, 0);
+        const bwViews = bw.reduce((s, c) => s + c.views, 0);
+        document.getElementById('ch-channels-count').textContent = ch.length;
+        document.getElementById('ch-channels-views').textContent = `${fmt(chViews)} views`;
+        document.getElementById('ch-referrers-count').textContent = ref.length;
+        document.getElementById('ch-referrers-views').textContent = `${fmt(refViews)} views`;
+        document.getElementById('ch-bw-count').textContent = bw.length;
+        document.getElementById('ch-bw-views').textContent = `${fmt(bwViews)} views`;
+
+        const allDist = [...ch, ...ref, ...bw, ...searchAndAi];
+        const growing = allDist.filter(c => c.trend === 'up');
+        const declining = allDist.filter(c => c.trend === 'down');
+        document.getElementById('ch-growing').textContent = growing.length;
+        document.getElementById('ch-growing-detail').textContent =
+            growing.length ? `Top: ${growing.sort((a,b) => b.pct_change - a.pct_change)[0].name}` : '';
+        document.getElementById('ch-declining').textContent = declining.length;
+        document.getElementById('ch-declining-detail').textContent =
+            declining.length ? `Top: ${declining.sort((a,b) => a.pct_change - b.pct_change)[0].name}` : '';
+
+        // Channels (intentional)
+        document.getElementById('ch-channels-list').innerHTML =
+            ch.map((c, i) => renderChannelCard(c, 'ch', i)).join('')
+            || '<div class="loading">No channel data</div>';
+
+        // Referrers (organic)
+        document.getElementById('ch-referrers-list').innerHTML =
+            ref.map((c, i) => renderChannelCard(c, 'ref', i)).join('')
+            || '<div class="loading">No referrer data</div>';
+
+        // Brand websites (top 20)
+        document.getElementById('ch-bw-list').innerHTML =
+            bw.slice(0, 10).map((c, i) => renderChannelCard(c, 'bw', i)).join('')
+            || '<div class="loading">No brand website data</div>';
+
+        // Search & AI
+        document.getElementById('ch-search-list').innerHTML =
+            searchAndAi.map((c, i) => renderChannelCard(c, 'sa', i)).join('')
+            || '<div class="loading">No search/AI data</div>';
+
+        // Brand rollup
+        const brands = data.brand_rollup || [];
+        document.getElementById('ch-brand-list').innerHTML = brands.map(b => {
+            const pctColor = b.pct_change < 0 ? 'var(--accent-red)' : b.pct_change > 0 ? 'var(--accent-green)' : 'var(--text-secondary)';
+            const pctSign = b.pct_change > 0 ? '+' : '';
+            const trendClass = b.trend === 'up' ? 'trend-up' : b.trend === 'down' ? 'trend-down' : 'trend-stable';
+            return `
+                <div class="brand-card ${trendClass}">
+                    <div style="font-weight:600;font-size:0.9rem;">${b.brand}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;text-align:right;">${fmt(b.views)}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;text-align:right;">${b.property_count}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;text-align:right;">${fmtArr(b.total_arr)}</div>
+                    <div style="text-align:right;">
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:${pctColor}">${pctSign}${b.pct_change}%</div>
+                        <div style="font-size:0.7rem;color:var(--text-muted);">was ${fmt(b.views_previous)}</div>
+                    </div>
+                </div>
+            `;
+        }).join('') || '<div class="loading">No brand data</div>';
+
+        // AI Spotlight
+        const aiSpotlight = data.ai_spotlight || {total_views: 0, platforms: {}, top_properties: []};
+        if (aiSpotlight.total_views >= 200) {
+            document.getElementById('ai-spotlight-section').style.display = '';
+            const platList = Object.entries(aiSpotlight.platforms).map(([p, v]) => `${p}: ${v} views`).join(' · ');
+            const propList = aiSpotlight.top_properties.map(p =>
+                `<div class="ai-prop"><span>${p.name}</span><span>${p.views} views</span></div>`
+            ).join('');
+            document.getElementById('ai-spotlight-content').innerHTML = `
+                <div class="ai-total">${aiSpotlight.total_views} AI referral views</div>
+                <div class="ai-platforms">${platList}</div>
+                <div class="ai-props">${propList}</div>
+            `;
+        } else if (aiSpotlight.total_views > 0) {
+            document.getElementById('ai-spotlight-section').style.display = '';
+            document.getElementById('ai-spotlight-content').innerHTML = `
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:0.65rem;padding:3px 8px;border-radius:8px;background:rgba(249,115,22,0.1);color:var(--accent-orange);font-weight:700;letter-spacing:0.05em;">EARLY SIGNAL</span>
+                    <span style="font-size:0.85rem;color:var(--text-secondary);">${aiSpotlight.total_views} AI referral views this period</span>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">Tracking AI-driven traffic (ChatGPT, Perplexity, Gemini). Volume is low but emerging — this section expands automatically as AI referrals grow.</div>
+            `;
+        }
+
+        // Coverage gaps
+        const gaps = data.coverage_gaps || [];
+        document.getElementById('ch-gaps-badge').textContent = gaps.length;
+        document.getElementById('ch-gaps-list').innerHTML = gaps.map(g => `
+            <div class="cx-card dark" style="border-left-color: var(--accent-red);">
+                <div>
+                    <div class="prop-name">${g.name}</div>
+                    ${g.brand ? `<div class="prop-brand">${g.brand}</div>` : ''}
+                </div>
+                <div class="arr-value">${fmtArr(g.arr)}</div>
+                <div class="csm-name">${g.top_channel}</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;">${fmt(g.views)}</div>
+            </div>
+        `).join('') || '<div class="loading">All properties have multi-channel distribution</div>';
+
+        // Draw sparklines
+        requestAnimationFrame(() => {
+            tp.forEach((c, i) => {
+                const canvas = document.getElementById(`spark-tp-${i}`);
+                if (canvas) drawSparkline(canvas, c.weekly, c.pct_change < 0);
+            });
+            bw.slice(0, 10).forEach((c, i) => {
+                const canvas = document.getElementById(`spark-bw-${i}`);
+                if (canvas) drawSparkline(canvas, c.weekly, c.pct_change < 0);
+            });
+            searchAndAi.forEach((c, i) => {
+                const canvas = document.getElementById(`spark-sa-${i}`);
+                if (canvas) drawSparkline(canvas, c.weekly, c.pct_change < 0);
+            });
+        });
+    }
+
+    // ============ CX LEADERSHIP TAB ============
+    function fmtArr(n) {
+        if (!n) return '$0';
+        if (n >= 1000) return '$' + (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+        return '$' + fmt(n);
+    }
+
+    function renderCxSignals(data) {
+        const cx = data.cx_signals || {wins: [], opportunities: []};
+        const dark = data.dark_properties || [];
+        const totals = data.totals || {};
+
+        // Stats
+        document.getElementById('cx-active').textContent = fmt(totals.active_accounts || 0);
+        document.getElementById('cx-with-traffic').textContent =
+            `${fmt(totals.unique_properties || 0)} with traffic`;
+        document.getElementById('cx-dark').textContent = fmt(totals.dark_properties || dark.length);
+        document.getElementById('cx-wins-count').textContent = cx.wins.length;
+        document.getElementById('cx-opps-count').textContent = cx.opportunities.length;
+
+        // Badges
+        document.getElementById('cx-wins-badge').textContent = cx.wins.length;
+        document.getElementById('cx-opps-badge').textContent = cx.opportunities.length;
+        document.getElementById('cx-dark-badge').textContent = dark.length;
+
+        // Key Takeaways — auto-generated from data
+        const takeaways = [];
+        const portfolios_t = data.csm_portfolios || [];
+
+        // Most at-risk CSM
+        const riskiest = portfolios_t.filter(p => p.arr_at_risk > 0).sort((a, b) => -a.arr_at_risk + b.arr_at_risk)[0];
+        if (riskiest) {
+            takeaways.push(`<strong>${riskiest.csm}</strong> has <span class="num">${fmtArr(riskiest.arr_at_risk)}</span> ARR at risk across ${riskiest.opportunities} declining accounts with only ${riskiest.wins} growing`);
+        }
+
+        // Healthiest CSM
+        const healthiest = portfolios_t.filter(p => p.arr_growing > 0).sort((a, b) => {
+            const ra = a.arr_at_risk || 1; const rb = b.arr_at_risk || 1;
+            return (b.arr_growing / rb) - (a.arr_growing / ra);
+        })[0];
+        if (healthiest && healthiest.csm !== (riskiest || {}).csm) {
+            const ratio = healthiest.arr_at_risk > 0 ? (healthiest.arr_growing / healthiest.arr_at_risk).toFixed(1) + 'x' : 'all growth';
+            takeaways.push(`<strong>${healthiest.csm}</strong> has the healthiest portfolio — ${ratio} growing-to-risk ratio with ${healthiest.wins} accounts up`);
+        }
+
+        // Dark properties
+        if (dark.length > 0) {
+            const topDark = dark[0];
+            takeaways.push(`<span class="num">${dark.length}</span> active properties have zero distribution traffic — highest: <strong>${topDark.name}</strong> (${fmtArr(topDark.arr)} ARR)`);
+        }
+
+        // Biggest single win
+        if (cx.wins.length) {
+            const bigWin = cx.wins[0];
+            takeaways.push(`Biggest win: <strong>${bigWin.name}</strong> up ${bigWin.pct_change}% — ${fmtArr(bigWin.arr)} ARR, CSM: ${bigWin.csm || 'unassigned'}`);
+        }
+
+        // Coverage gaps
+        const gaps_t = data.coverage_gaps || [];
+        if (gaps_t.length >= 10) {
+            takeaways.push(`<span class="num">${gaps_t.length}</span> properties depend on a single distribution channel — one change could zero out their traffic`);
+        }
+
+        document.getElementById('cx-takeaways').innerHTML = takeaways.length ?
+            `<h4>Key Takeaways</h4>` + takeaways.map(t => `<div class="takeaway">→ ${t}</div>`).join('') :
+            '';
+
+        // CSM Portfolios
+        const portfolios = data.csm_portfolios || [];
+        document.getElementById('cx-csm-list').innerHTML = portfolios.map((p, idx) => {
+            const riskColor = p.arr_at_risk > 50000 ? 'var(--accent-red)' : p.arr_at_risk > 20000 ? 'var(--accent-orange)' : 'var(--text-secondary)';
+
+            // Health ratio: ARR growing / ARR at risk
+            let healthLabel, healthColor;
+            if (p.arr_at_risk === 0 && p.arr_growing > 0) {
+                healthLabel = '★'; healthColor = 'var(--accent-green)';
+            } else if (p.arr_at_risk === 0) {
+                healthLabel = '—'; healthColor = 'var(--text-muted)';
+            } else {
+                const ratio = p.arr_growing / p.arr_at_risk;
+                healthLabel = ratio.toFixed(1) + 'x';
+                healthColor = ratio >= 2 ? 'var(--accent-green)' : ratio >= 1 ? 'var(--accent-cyan)' : ratio >= 0.5 ? 'var(--accent-orange)' : 'var(--accent-red)';
+            }
+
+            // Build detail rows
+            let details = '';
+            if (p.top_opps && p.top_opps.length) {
+                details += p.top_opps.map(a =>
+                    `<div class="csm-detail-row opp"><span class="csm-detail-name">${a.name}</span><span class="csm-detail-arr">${fmtArr(a.arr)}</span><span class="csm-detail-pct" style="color:var(--accent-red)">${a.pct}%</span></div>`
+                ).join('');
+            }
+            if (p.top_wins && p.top_wins.length) {
+                details += p.top_wins.map(a =>
+                    `<div class="csm-detail-row win"><span class="csm-detail-name">${a.name}</span><span class="csm-detail-arr">${fmtArr(a.arr)}</span><span class="csm-detail-pct" style="color:var(--accent-green)">+${a.pct}%</span></div>`
+                ).join('');
+            }
+            if (p.top_dark && p.top_dark.length) {
+                details += p.top_dark.map(a =>
+                    `<div class="csm-detail-row dark"><span class="csm-detail-name">${a.name}</span><span class="csm-detail-arr">${fmtArr(a.arr)}</span><span class="csm-detail-pct" style="color:var(--accent-orange)">dark</span></div>`
+                ).join('');
+            }
+
+            return `
+                <div class="csm-card" style="cursor:pointer;" onclick="toggleCsmDetail(this, ${idx})">
+                    <div class="csm-name">${p.csm} <span style="font-size:0.65rem;color:var(--text-muted);">▸</span></div>
+                    <div style="font-size:0.8rem;">
+                        <span style="color:var(--accent-green)">${p.wins}</span> growing · <span style="color:var(--accent-red)">${p.opportunities}</span> declining · <span style="color:var(--text-muted)">${p.stable || 0}</span> stable${p.dark ? ` · <span style="color:var(--accent-orange)">${p.dark}</span> dark` : ''}${p.total_accounts ? ` <span style="color:var(--text-muted);font-size:0.7rem;">of ${p.total_accounts}</span>` : ''}
+                    </div>
+                    <div class="csm-arr" style="color:var(--accent-green)">${fmtArr(p.arr_growing)}</div>
+                    <div class="csm-arr" style="color:${riskColor}">${fmtArr(p.arr_at_risk)}</div>
+                    <div class="csm-arr" style="color:${healthColor};font-weight:700;">${healthLabel}</div>
+                </div>
+                <div id="csm-detail-${idx}" class="csm-detail-panel" style="display:none;">
+                    ${details || '<div style="padding:0.5rem 1.25rem;color:var(--text-muted);font-size:0.8rem;">No accounts in this period</div>'}
+                </div>
+            `;
+        }).join('') || '<div class="loading">No CSM data</div>';
+
+        // Distribution Scores (top 15 + bottom 10)
+        const scores = data.distribution_scores || [];
+        const topScores = scores.slice(0, 15);
+        const bottomScores = scores.length > 25 ? scores.slice(-10) : [];
+        const scoreCards = (list) => list.map(s => {
+            const tier = s.score >= 75 ? 'high' : s.score >= 40 ? 'mid' : 'low';
+            return `
+                <div class="score-card">
+                    <div>
+                        <span class="score-badge ${tier}">${s.score}</span>
+                    </div>
+                    <div>
+                        <div style="font-weight:600;font-size:0.9rem;">${s.name}</div>
+                        ${s.brand ? `<div style="font-size:0.7rem;color:var(--text-muted);">${s.brand}</div>` : ''}
+                    </div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;text-align:right;">${s.channel_count}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;text-align:right;">${fmt(s.views)}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;text-align:right;">${fmtArr(s.arr)}</div>
+                </div>
+            `;
+        }).join('');
+
+        let scoresHtml = scoreCards(topScores);
+        if (bottomScores.length) {
+            scoresHtml += `<div style="text-align:center;padding:0.75rem;color:var(--text-muted);font-size:0.8rem;">⋯ ${scores.length - 25} more properties ⋯</div>`;
+            scoresHtml += scoreCards(bottomScores);
+        }
+        document.getElementById('cx-scores-list').innerHTML = scoresHtml || '<div class="loading">No scores</div>';
+
+        // Wins
+        document.getElementById('cx-wins-list').innerHTML = cx.wins.map(w => {
+            const topDriver = w.channel_changes[0] || {};
+            return `
+                <div class="cx-card win">
+                    <div>
+                        <div class="prop-name">${w.name}</div>
+                        <div class="prop-location">${w.location}</div>
+                        ${w.brand ? `<div class="prop-brand">${w.brand}</div>` : ''}
+                    </div>
+                    <div class="arr-value">${fmtArr(w.arr)}</div>
+                    <div class="csm-name">${w.csm || '—'}</div>
+                    <div class="change-value" style="color: var(--accent-green)">+${w.pct_change}%</div>
+                    <div class="driver">
+                        <div class="channel">${topDriver.channel || '—'}</div>
+                        <div class="detail">${topDriver.views_previous || 0} → ${topDriver.views || 0} (+${topDriver.pct_change || 0}%)</div>
+                    </div>
+                </div>
+            `;
+        }).join('') || '<div class="loading">No wins this period</div>';
+
+        // Opportunities
+        document.getElementById('cx-opps-list').innerHTML = cx.opportunities.map(o => {
+            const topDrop = o.channel_changes[0] || {};
+            return `
+                <div class="cx-card opp">
+                    <div>
+                        <div class="prop-name">${o.name}</div>
+                        <div class="prop-location">${o.location}</div>
+                        ${o.brand ? `<div class="prop-brand">${o.brand}</div>` : ''}
+                    </div>
+                    <div class="arr-value">${fmtArr(o.arr)}</div>
+                    <div class="csm-name">${o.csm || '—'}</div>
+                    <div class="change-value" style="color: var(--accent-red)">${o.pct_change}%</div>
+                    <div class="driver">
+                        <div class="channel">${topDrop.channel || '—'}</div>
+                        <div class="detail">${topDrop.views_previous || 0} → ${topDrop.views || 0} (${topDrop.pct_change || 0}%)</div>
+                    </div>
+                </div>
+            `;
+        }).join('') || '<div class="loading">No opportunities this period</div>';
+
+        // Dark Properties
+        document.getElementById('cx-dark-list').innerHTML = dark.map(d => `
+            <div class="cx-card dark">
+                <div>
+                    <div class="prop-name">${d.name}</div>
+                    ${d.parent ? `<div class="prop-location">${d.parent}</div>` : ''}
+                </div>
+                <div class="arr-value">${fmtArr(d.arr)}</div>
+                <div class="csm-name">${d.csm || '—'}</div>
+                <div class="prop-brand">${d.brand || '—'}</div>
+            </div>
+        `).join('') || '<div class="loading">All active accounts have traffic</div>';
+    }
+
+    // ============ OVERVIEW RENDERERS (unchanged) ============
+    function renderStats(data) {
+        const t = data.totals;
+        // Remove shimmer
+        document.querySelectorAll('.value.loading').forEach(el => el.classList.remove('loading'));
+
+        document.getElementById('stat-views').textContent = fmt(t.views);
+        document.getElementById('stat-properties').textContent = fmt(t.unique_properties);
+        if (t.active_accounts) {
+            document.getElementById('stat-properties-total').textContent = `of ${fmt(t.active_accounts)} active`;
+        }
+
+        const pct = t.pct_change;
+        const arrow = pct >= 0 ? '+' : '';
+        document.getElementById('stat-change').textContent = `${arrow}${pct}%`;
+        document.getElementById('stat-change').style.color = pct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+        document.getElementById('stat-prev-total').textContent = `prev: ${fmt(t.views_previous)}`;
+
+        const changeEl = document.getElementById('stat-views-change');
+        const diff = t.views - t.views_previous;
+        changeEl.textContent = `${diff >= 0 ? '+' : ''}${fmt(diff)} views`;
+        changeEl.className = `change ${diff >= 0 ? 'up' : 'down'}`;
+    }
+
+    function renderPlatformSplit(breakdown) {
+        const vm = breakdown['visitingmedia.com'] || {};
+        const tt = breakdown['truetour.app'] || {};
+        const vmPct = vm.pct || 0;
+        const ttPct = tt.pct || 0;
+        document.getElementById('vm-bar').style.width = `${vmPct}%`;
+        document.getElementById('tt-bar').style.width = `${ttPct}%`;
+        document.getElementById('vm-pct').textContent = `visitingmedia.com ${vmPct}%`;
+        document.getElementById('tt-pct').textContent = `truetour.app ${ttPct}%`;
+    }
+
+    function renderAlerts(alerts) {
+        if (!alerts.length) return;
+        document.getElementById('alerts-section').style.display = '';
+        const list = document.getElementById('alerts-list');
+        list.innerHTML = alerts.map(a => {
+            let icon, shortDesc;
+            if (a.type === 'new_channel') {
+                icon = '\u2728';
+                shortDesc = `<span class="alert-name">${a.channel}</span> <span class="alert-detail">new \u2014 ${fmt(a.views)} views</span>`;
+            } else if (a.type === 'surge') {
+                icon = '\u25B2';
+                shortDesc = `<span class="alert-name">${a.channel}</span> <span class="alert-detail">+${a.pct_change}%</span>`;
+            } else {
+                icon = '\u25BC';
+                shortDesc = `<span class="alert-name">${a.channel}</span> <span class="alert-detail">${a.pct_change}%</span>`;
+            }
+            return `<div class="alert-pill ${a.type}">${icon} ${shortDesc}</div>`;
+        }).join('');
+    }
+
+    function renderCategoryChart(categories) {
+        const merged = {...categories};
+        const bw = merged['brand_website'] || {views:0, property_count:0, channel_count:0, views_previous:0, pct_change:0};
+        const pw = merged['property_website'] || {views:0, property_count:0, channel_count:0, views_previous:0, pct_change:0};
+        const combinedViews = bw.views + pw.views;
+        const combinedPrev = bw.views_previous + pw.views_previous;
+        merged['websites'] = {
+            views: combinedViews,
+            property_count: bw.property_count + pw.property_count,
+            channel_count: bw.channel_count + pw.channel_count,
+            views_previous: combinedPrev,
+            pct_change: combinedPrev > 0 ? Math.round(((combinedViews - combinedPrev) / combinedPrev) * 1000) / 10 : 0,
+        };
+        delete merged['brand_website'];
+        delete merged['property_website'];
+
+        const entries = Object.entries(merged)
+            .filter(([k]) => k !== 'direct' && k !== 'unknown')
+            .sort((a, b) => b[1].views - a[1].views);
+
+        const ctx = document.getElementById('category-chart').getContext('2d');
+        if (charts.category) charts.category.destroy();
+
+        charts.category = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: entries.map(([k]) => CAT_LABELS[k] || k),
+                datasets: [{
+                    label: 'Pageviews',
+                    data: entries.map(([, v]) => v.views),
+                    backgroundColor: entries.map(([k]) => (CAT_COLORS[k] || '#6366f1') + 'cc'),
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: (tip) => {
+                                const [, v] = entries[tip.dataIndex];
+                                const arrow = v.pct_change >= 0 ? '+' : '';
+                                return `${arrow}${v.pct_change}% vs prev | ${v.channel_count} channels | ${v.property_count} properties`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#9090a8', font: { family: 'JetBrains Mono', size: 11 },
+                            callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'k' : v },
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#f0f0f5', font: { size: 12 } },
+                    },
+                },
+            },
+        });
+        document.getElementById('category-chart').parentElement.style.height = `${Math.max(220, entries.length * 40)}px`;
+    }
+
+    function trimPartialWeeks(data) {
+        if (data.length <= 2) return data;
+        return data.slice(1, -1);
+    }
+
+    function renderWeeklyTotal(weekly) {
+        const totalData = trimPartialWeeks(weekly.total || []);
+        if (!totalData.length) return;
+
+        const ctx = document.getElementById('weekly-total-chart').getContext('2d');
+        if (charts.weeklyTotal) charts.weeklyTotal.destroy();
+
+        charts.weeklyTotal = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: totalData.map(w => {
+                    const wk = w.week.length > 4 ? w.week.slice(-2) : w.week;
+                    return 'W' + wk;
+                }),
+                datasets: [{
+                    label: 'Total Pageviews',
+                    data: totalData.map(w => w.views),
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#6366f1',
+                    borderWidth: 2.5,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: tip => `${fmt(tip.parsed.y)} pageviews` } }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#9090a8', font: { family: 'JetBrains Mono', size: 10 } },
+                    },
+                    y: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#9090a8', font: { family: 'JetBrains Mono', size: 11 },
+                            callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'k' : v },
+                    },
+                },
+            },
+        });
+        document.getElementById('weekly-total-chart').parentElement.style.height = '280px';
+    }
+
+    function renderBarChart(canvasId, items, chartKey, limit) {
+        const top = items.slice(0, limit || 12);
+        if (!top.length) return;
+
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        if (charts[chartKey]) charts[chartKey].destroy();
+
+        charts[chartKey] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: top.map(c => c.name),
+                datasets: [{
+                    label: 'Pageviews',
+                    data: top.map(c => c.views),
+                    backgroundColor: top.map((c, i) => {
+                        if (c.trend === 'up') return 'rgba(16, 185, 129, 0.7)';
+                        if (c.trend === 'down') return 'rgba(239, 68, 68, 0.5)';
+                        return BAR_COLORS[i % BAR_COLORS.length] + 'cc';
+                    }),
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: (tip) => {
+                                const c = top[tip.dataIndex];
+                                const arrow = c.pct_change >= 0 ? '+' : '';
+                                return `${arrow}${c.pct_change}% vs prev | ${c.property_count} properties`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#9090a8', font: { family: 'JetBrains Mono', size: 11 },
+                            callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'k' : v },
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#f0f0f5', font: { size: 11 } },
+                    },
+                },
+            },
+        });
+        document.getElementById(canvasId).parentElement.style.height = `${Math.max(200, top.length * 32)}px`;
+    }
+
+    function renderThirdPartyChart(channels) {
+        renderBarChart('third-party-chart', channels, 'thirdParty', 15);
+    }
+
+    function renderWebsitesChart(brandWebsites, propertyWebsites) {
+        const combined = [
+            ...brandWebsites.map(c => ({...c, isBrand: true})),
+            ...propertyWebsites.map(c => ({...c, isBrand: false})),
+        ].sort((a, b) => b.views - a.views).slice(0, 15);
+
+        if (!combined.length) return;
+        const ctx = document.getElementById('websites-chart').getContext('2d');
+        if (charts.websites) charts.websites.destroy();
+
+        charts.websites = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: combined.map(c => c.name),
+                datasets: [{
+                    label: 'Pageviews',
+                    data: combined.map(c => c.views),
+                    backgroundColor: combined.map(c =>
+                        c.isBrand ? 'rgba(16, 185, 129, 0.7)' : 'rgba(245, 158, 11, 0.6)'
+                    ),
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: (tip) => {
+                                const c = combined[tip.dataIndex];
+                                const arrow = c.pct_change >= 0 ? '+' : '';
+                                const tag = c.isBrand ? 'Brand' : 'Property';
+                                return `${tag} | ${arrow}${c.pct_change}% vs prev | ${c.property_count} properties`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#9090a8', font: { family: 'JetBrains Mono', size: 11 },
+                            callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'k' : v },
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#f0f0f5', font: { size: 11 } },
+                    },
+                },
+            },
+        });
+        document.getElementById('websites-chart').parentElement.style.height = `${Math.max(200, combined.length * 32)}px`;
+    }
+
+    function renderWeeklyCategoryChart(weekly) {
+        const catData = weekly.categories || {};
+        const cats = Object.keys(catData).filter(k => k !== 'direct' && k !== 'unknown');
+        if (!cats.length) return;
+
+        const rawWeeks = [...new Set(cats.flatMap(c => catData[c].map(w => w.week)))].sort();
+        const allWeeks = rawWeeks.length > 2 ? rawWeeks.slice(1, -1) : rawWeeks;
+
+        const ctx = document.getElementById('weekly-category-chart').getContext('2d');
+        if (charts.weeklyCategory) charts.weeklyCategory.destroy();
+
+        charts.weeklyCategory = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: allWeeks.map(w => {
+                    const wk = w.length > 4 ? w.slice(-2) : w;
+                    return 'W' + wk;
+                }),
+                datasets: cats.map(cat => {
+                    const weekMap = Object.fromEntries(catData[cat].map(w => [w.week, w.views]));
+                    return {
+                        label: CAT_LABELS[cat] || cat,
+                        data: allWeeks.map(w => weekMap[w] || 0),
+                        borderColor: CAT_COLORS[cat] || '#6366f1',
+                        backgroundColor: (CAT_COLORS[cat] || '#6366f1') + '15',
+                        tension: 0.3,
+                        pointRadius: 2,
+                        borderWidth: 2,
+                    };
+                }),
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#9090a8', font: { size: 11 }, boxWidth: 12, padding: 15 },
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: tip => `${tip.dataset.label}: ${fmt(tip.parsed.y)}`,
+                        }
+                    }
+                },
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#9090a8', font: { family: 'JetBrains Mono', size: 10 } },
+                    },
+                    y: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#9090a8', font: { family: 'JetBrains Mono', size: 11 },
+                            callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'k' : v },
+                    },
+                },
+            },
+        });
+        document.getElementById('weekly-category-chart').parentElement.style.height = '320px';
+    }
+
+    function renderProperties(props) {
+        const tbody = document.getElementById('properties-body');
+        tbody.innerHTML = props.map(p => `
+            <tr>
+                <td>${p.name}</td>
+                <td>${p.brand ? `<span class="brand-tag">${p.brand}</span>` : '-'}</td>
+                <td>${p.csm || '-'}</td>
+                <td class="views-col">${p.arr ? fmtArr(p.arr) : '-'}</td>
+                <td class="views-col">${fmt(p.views)}</td>
+                <td><span class="channel-tag">${p.top_channel}</span></td>
+            </tr>
+        `).join('');
+
+        document.querySelectorAll('#properties-table th').forEach(th => {
+            th.addEventListener('click', () => {
+                const col = th.dataset.sort;
+                if (sortCol === col) sortDir *= -1;
+                else { sortCol = col; sortDir = -1; }
+                props.sort((a, b) => {
+                    let va = a[col] || '', vb = b[col] || '';
+                    if (col === 'views' || col === 'arr') return ((va || 0) - (vb || 0)) * sortDir;
+                    return String(va).localeCompare(String(vb)) * sortDir;
+                });
+                renderProperties(props);
+            });
+        });
+    }
+
+    // ============ LEGACY SUNSET TAB ============
+
+    async function loadTt8Sunset() {
+        try {
+            const res = await fetch('/analytics/api/tt8-retirement');
+            if (!res.ok) {
+                document.getElementById('tt8-top-slugs').innerHTML =
+                    '<div style="color:var(--text-muted);padding:1rem;">No data yet. Run tt8_retirement_collector.py to populate.</div>';
+                return;
+            }
+            const d = await res.json();
+            if (d.error) {
+                document.getElementById('tt8-top-slugs').innerHTML =
+                    `<div style="color:var(--text-muted);padding:1rem;">${d.error}</div>`;
+                return;
+            }
+            renderTt8Sunset(d);
+        } catch (e) {
+            console.error('tt8 sunset error:', e);
+        }
+    }
+
+    function renderTt8Sunset(d) {
+        const mtd = d.mtd || {};
+        const prior = d.prior_month || {};
+        const gauge = d.gauge || {};
+        const trend = d.daily_trend || [];
+        const proj = d.projection || {};
+        const slugs = d.top_slugs || [];
+
+        // --- Stat cards ---
+        document.getElementById('tt8-mtd-views').textContent = fmt(mtd.pageviews || 0);
+        if (mtd.start && mtd.end) {
+            document.getElementById('tt8-mtd-dates').textContent = `${mtd.start} to ${mtd.end}`;
+        }
+
+        const delta = prior.delta || 0;
+        const deltaEl = document.getElementById('tt8-prior-delta');
+        const isDown = delta <= 0;
+        deltaEl.textContent = (delta >= 0 ? '+' : '') + fmt(delta);
+        deltaEl.style.color = isDown ? 'var(--accent-green)' : 'var(--accent-red)';
+        if (prior.label) {
+            document.getElementById('tt8-prior-label').textContent = `vs ${prior.label}`;
+        }
+        const pct = prior.delta_pct || 0;
+        const pctEl = document.getElementById('tt8-prior-pct');
+        pctEl.textContent = `${pct >= 0 ? '+' : ''}${pct}% MoM`;
+        pctEl.style.color = pct <= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+
+        // --- Months to zero (exponential decay model) ---
+        const dtzEl = document.getElementById('tt8-days-to-zero');
+        const zdEl = document.getElementById('tt8-zero-date');
+        if (proj.declining) {
+            const months = proj.months_to_zero;
+            if (months === 0) {
+                dtzEl.textContent = 'Effectively zero';
+            } else if (months === 1) {
+                dtzEl.textContent = '~1 month';
+            } else {
+                dtzEl.textContent = `~${months} months`;
+            }
+            dtzEl.style.color = 'var(--accent-green)';
+            const declinePct = proj.mom_decline_pct ? `${proj.mom_decline_pct}% MoM decline` : '';
+            zdEl.textContent = proj.zero_date ? `Effective zero by ${proj.zero_date} (${declinePct})` : declinePct;
+        } else {
+            dtzEl.textContent = 'Not declining';
+            dtzEl.style.color = 'var(--accent-red)';
+            zdEl.textContent = proj.reason || '';
+        }
+
+        // --- Gauge (CSS/Canvas semi-circle) ---
+        drawGauge(gauge.value || 0, gauge.max || 1, gauge.decline_from_baseline_pct || 0);
+
+        // --- 90-day trend chart ---
+        drawTrendChart(trend);
+
+        // --- Top slugs table ---
+        const slugsEl = document.getElementById('tt8-top-slugs');
+        if (!slugs.length) {
+            slugsEl.innerHTML = '<div style="color:var(--text-muted);padding:1rem;">No slug data available.</div>';
+        } else {
+            slugsEl.innerHTML = `
+                <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:0.5rem 1.5rem;align-items:center;font-size:0.85rem;">
+                    <div style="font-weight:600;color:var(--text-muted);font-size:0.75rem;letter-spacing:0.05em;text-transform:uppercase;">Slug</div>
+                    <div style="font-weight:600;color:var(--text-muted);font-size:0.75rem;letter-spacing:0.05em;text-transform:uppercase;text-align:right;">This Month</div>
+                    <div style="font-weight:600;color:var(--text-muted);font-size:0.75rem;letter-spacing:0.05em;text-transform:uppercase;text-align:right;">Last Month</div>
+                    <div style="font-weight:600;color:var(--text-muted);font-size:0.75rem;letter-spacing:0.05em;text-transform:uppercase;text-align:right;">Change</div>
+                    ${slugs.map(s => {
+                        const chg = s.change || 0;
+                        const chgColor = chg <= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+                        return `
+                            <div style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--text-secondary);padding:0.5rem 0;border-top:1px solid var(--border);">${s.slug}</div>
+                            <div style="font-family:'JetBrains Mono',monospace;text-align:right;padding:0.5rem 0;border-top:1px solid var(--border);">${fmt(s.views_this_month)}</div>
+                            <div style="font-family:'JetBrains Mono',monospace;text-align:right;color:var(--text-muted);padding:0.5rem 0;border-top:1px solid var(--border);">${fmt(s.views_last_month)}</div>
+                            <div style="font-family:'JetBrains Mono',monospace;text-align:right;color:${chgColor};font-weight:600;padding:0.5rem 0;border-top:1px solid var(--border);">${chg >= 0 ? '+' : ''}${fmt(chg)}</div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+    }
+
+    function drawGauge(value, max, declinePct) {
+        const canvas = document.getElementById('tt8-gauge');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width;
+        const H = canvas.height;
+        const cx = W / 2;
+        const cy = H - 30;  // center of arc near bottom
+        const r = 130;
+
+        ctx.clearRect(0, 0, W, H);
+
+        // Background arc (full semi-circle): green (left) -> yellow -> red (right)
+        // Start: Math.PI (left), End: 0 (right)
+        const segments = 60;
+        for (let i = 0; i < segments; i++) {
+            const startAngle = Math.PI + (i / segments) * Math.PI;
+            const endAngle = Math.PI + ((i + 1) / segments) * Math.PI;
+            const t = i / segments;
+            // green -> yellow -> red gradient
+            let r2, g2, b2;
+            if (t < 0.5) {
+                r2 = Math.round(16 + (245 - 16) * (t * 2));
+                g2 = Math.round(185 - (185 - 158) * (t * 2));
+                b2 = Math.round(129 * (1 - t * 2));
+            } else {
+                const u = (t - 0.5) * 2;
+                r2 = Math.round(245 + (239 - 245) * u);
+                g2 = Math.round(158 - 158 * u);
+                b2 = 11;
+            }
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, startAngle, endAngle);
+            ctx.lineWidth = 18;
+            ctx.strokeStyle = `rgb(${r2},${g2},${b2})`;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+        }
+
+        // Needle
+        const ratio = Math.min(1, Math.max(0, value / max));
+        // ratio 0 = left (Math.PI), ratio 1 = right (0)
+        const needleAngle = Math.PI + ratio * Math.PI;
+        const nx = cx + (r - 20) * Math.cos(needleAngle);
+        const ny = cy + (r - 20) * Math.sin(needleAngle);
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(nx, ny);
+        ctx.strokeStyle = '#f0f0f5';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        // Center dot
+        ctx.beginPath();
+        ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#f0f0f5';
+        ctx.fill();
+
+        // Update labels
+        document.getElementById('tt8-gauge-value').textContent = fmt(value);
+        document.getElementById('tt8-gauge-max-label').textContent = `${fmt(max)} (peak)`;
+        const decEl = document.getElementById('tt8-gauge-decline');
+        if (declinePct > 0) {
+            decEl.textContent = `${declinePct}% below baseline`;
+            decEl.style.color = 'var(--accent-green)';
+        } else if (declinePct < 0) {
+            decEl.textContent = `${Math.abs(declinePct)}% above baseline`;
+            decEl.style.color = 'var(--accent-red)';
+        } else {
+            decEl.textContent = 'at baseline';
+        }
+    }
+
+    function drawTrendChart(trend) {
+        const canvas = document.getElementById('tt8-trend-chart');
+        if (!canvas || !trend.length) return;
+
+        // Destroy old chart if any
+        if (charts['tt8-trend']) {
+            charts['tt8-trend'].destroy();
+            delete charts['tt8-trend'];
+        }
+
+        const labels = trend.map(d => d.date);
+        const values = trend.map(d => d.pageviews);
+
+        // 7-day moving average
+        const ma7 = values.map((v, i) => {
+            const slice = values.slice(Math.max(0, i - 6), i + 1);
+            return Math.round(slice.reduce((a, b) => a + b, 0) / slice.length);
+        });
+
+        charts['tt8-trend'] = new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Daily Pageviews',
+                        data: values,
+                        borderColor: 'rgba(239, 68, 68, 0.4)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        tension: 0.2,
+                        fill: true,
+                    },
+                    {
+                        label: '7-day avg',
+                        data: ma7,
+                        borderColor: 'rgba(239, 68, 68, 0.9)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.3,
+                        fill: false,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: { color: 'rgba(255,255,255,0.5)', font: { size: 11 } },
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(10, 10, 26, 0.95)',
+                        titleColor: '#f0f0f5',
+                        bodyColor: '#9090a8',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                    },
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: 'rgba(255,255,255,0.4)',
+                            font: { size: 10 },
+                            maxTicksLimit: 10,
+                            maxRotation: 0,
+                        },
+                        grid: { color: 'rgba(255,255,255,0.04)' },
+                    },
+                    y: {
+                        ticks: {
+                            color: 'rgba(255,255,255,0.4)',
+                            font: { size: 10 },
+                            callback: v => v >= 1000 ? (v / 1000).toFixed(1) + 'K' : v,
+                        },
+                        grid: { color: 'rgba(255,255,255,0.04)' },
+                        beginAtZero: true,
+                    },
+                },
+            },
+        });
+    }
+
+    loadDashboard();
+    loadTt8Sunset();
+    </script>
+</body>
+</html>
